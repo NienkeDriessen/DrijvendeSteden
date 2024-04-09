@@ -3,16 +3,12 @@ import numpy as np
 from matplotlib import pyplot as plt 
 
 def read_image(img_path):
-    raw_img = cv2.imread(img_path) 
-    width = 800
-    aspect_ratio = raw_img.shape[1] / raw_img.shape[0]
-    height = int(width / aspect_ratio)
-    img = cv2.resize(raw_img, (width, height))
+    img = cv2.imread(img_path) 
     return img
 
 def find_contours(img):
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) 
-    _, threshold = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY) 
+    img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) 
+    _, threshold = cv2.threshold(img_gray, 127, 255, cv2.THRESH_BINARY) 
     contours, _ = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
     return contours
 

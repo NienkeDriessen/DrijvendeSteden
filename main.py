@@ -1,10 +1,9 @@
-from cell_finder import find_cells, show_results
+from hexagon_finder import find_hexagons
 from building_matcher import match_buildings
 
 if __name__== "__main__" :
-    extracted_cells, img = find_cells('resources/grid_with_buildings.png')
-    # show_results(img, extracted_cells)
+    hexagons = find_hexagons('resources/city2_greenscreen.png')
 
-    for cell in extracted_cells.values():
-        match_buildings(cell)
+    # for cell in extracted_cells.values():
+    #     match_buildings(cell)
     

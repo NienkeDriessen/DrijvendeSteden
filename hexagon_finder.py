@@ -79,8 +79,8 @@ def identify_hexagons(img):
                 if M['m00'] != 0.0: 
                     x = int(M['m10']/M['m00']) 
                     y = int(M['m01']/M['m00']) 
-                coordinates = str(x) + "," + str(y)
-                cv2.putText(img_copy, coordinates, (x, y), cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.5, (0, 0, 0), 1) 
+                coordinates = (x, y)
+                cv2.putText(img_copy, str(coordinates), coordinates, cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.5, (0, 0, 0), 1) 
                 cv2.drawContours(img_copy, [contour], 0, (0, 0, 255), 2)
                 hexagons[coordinates] = extract_hexagon_image(contour, img)
 
@@ -94,4 +94,4 @@ def find_hexagons(img_path, show_results = False):
         show_image(contour_img)
         show_hexagons(hexagons)
 
-    return hexagons
+    return hexagons, contour_img

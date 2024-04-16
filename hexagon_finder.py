@@ -50,12 +50,9 @@ def remove_background(img):
 def find_contours(img):
     blurred = cv2.GaussianBlur(img, (15,15), 0)
     gray = cv2.cvtColor(blurred, cv2.COLOR_BGR2GRAY)
-    show_image(gray)
     edges = cv2.Canny(gray,5,30)
-    show_image(edges)
     kernel = np.ones((11,11), np.uint8)
     dilated_edges = cv2.dilate(edges, kernel, iterations=1)
-    show_image(dilated_edges)
     contours, _ = cv2.findContours(dilated_edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) 
 
     return contours
@@ -86,7 +83,6 @@ def identify_hexagons(img):
                 cv2.putText(img_copy, str(coordinates), coordinates, cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.5, (0, 0, 0), 1) 
                 cv2.drawContours(img_copy, [contour], 0, (0, 0, 255), 2)
                 hexagons[coordinates] = extract_hexagon_image(contour, img)
-    show_image(img_copy)
     return hexagons, img_copy
 
 def find_hexagons(img_path, show_results = False):

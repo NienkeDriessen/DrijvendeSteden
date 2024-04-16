@@ -2,8 +2,10 @@ from hexagon_finder import find_hexagons
 from building_matcher import match_buildings
 
 if __name__== "__main__" :
-    hexagons = find_hexagons('resources/city2_greenscreen.png')
+    hexagons = find_hexagons('resources/city2_greenscreen.png', show_results=True)
 
     # for cell in extracted_cells.values():
     #     match_buildings(cell)
+
+    
     

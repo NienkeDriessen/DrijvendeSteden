@@ -2,6 +2,7 @@ import math
 import cv2 
 from collections import Counter
 import numpy as np
+import matplotlib.pyplot as plt
 
 def build_hexagon_grid(coordinates, img):
     # Find all the direct neighbours
@@ -19,38 +20,89 @@ def build_hexagon_grid(coordinates, img):
     # Rotate all the coordinates around the anchor
     new_coords = rotate_points_around_anchor(coordinates, anchor, angle, img)
 
+    # Recursively create a grid starting at the anchor
     virtual_coords = {anchor : (250, 250)}
-    hexagon_grid = create_hexagon_grid(anchor, new_coords, adjacent_hexagon)
+    visited = [anchor]
+    odd_or_even = {anchor : False}
+    virtual_coords = create_hexagon_grid(anchor, new_coords, adjacent_hexagon, virtual_coords, visited, odd_or_even)
 
-def create_hexagon_grid(current_hexagon, new_coords, adjacent_hexagon, virtual_coords):
+    # This grid contains virtual coordinates pointing to original coordinates (which serve as keys)
+    grid = normalize_virtual_coords(virtual_coords, anchor)
+
+    # Replace this with the code to generate 3d models:
+    draw_grid(grid)
+
+def create_hexagon_grid(current_hexagon, new_coords, adjacent_hexagon, virtual_coords, visited, odd_or_even):
+    visited.append(current_hexagon)
+
     virtual_x, virtual_y = virtual_coords[current_hexagon]
     neighbours = find_neighbours(adjacent_hexagon, current_hexagon)
+
+    # Calculate the virtual coordinates for each neighbour (that does not have coordinates yet)
     for nb in neighbours:
         if nb in virtual_coords.keys():
             continue
 
         angle = calculate_angle(new_coords[current_hexagon], new_coords[nb])
+        odd = odd_or_even[current_hexagon]
+
+        # South East Neighbour
         if angle > 0 and angle <= math.pi / 3:
-            virtual_coords[nb] = (virtual_x + 1, virtual_y + 1)
-            print(nb, "n+1 m+1", angle)
+            virtual_coords[nb] = (virtual_x if odd else virtual_x - 1, virtual_y + 1)
+            odd_or_even[nb] = not odd
+        # South Neighbour
         elif angle > (1/3) * math.pi and angle <= (2/3) * math.pi:
-            virtual_coords[nb] = (virtual_x, virtual_y + 1)
-            print(nb, "n, m+1", angle)
-        elif angle > (2/3) * math.pi and angle <= math.pi:
-            virtual_coords[nb] = (virtual_x - 1, virtual_y + 1)
-            print(nb, "n-1, m+1", angle)
-        elif angle < 0 and angle >= -math.pi / 3:
-            virtual_coords[nb] = (virtual_x + 1, virtual_y)
-            print(nb, "n+1 m", angle)
-        elif angle < -(1/3) * math.pi and angle >= -(2/3) * math.pi:
-            virtual_coords[nb] = (virtual_x, virtual_y - 1)
-            print(nb, "n, m-1", angle)
-        elif angle < -(2/3) * math.pi and angle >= -math.pi:
             virtual_coords[nb] = (virtual_x - 1, virtual_y)
-            print(nb, "n-1, m", angle)
+            odd_or_even[nb] = odd
+        # South West Neighbour
+        elif angle > (2/3) * math.pi and angle <= math.pi:
+            virtual_coords[nb] = (virtual_x if odd else virtual_x - 1, virtual_y - 1)
+            odd_or_even[nb] = not odd
+        # North East Neighbour
+        elif angle < 0 and angle >= -math.pi / 3:
+            virtual_coords[nb] = (virtual_x + 1 if odd else virtual_x, virtual_y + 1)
+            odd_or_even[nb] = not odd
+        # North Neighbour
+        elif angle < -(1/3) * math.pi and angle >= -(2/3) * math.pi:
+            virtual_coords[nb] = (virtual_x + 1, virtual_y)
+            odd_or_even[nb] = odd
+        # North West Neighbour
+        elif angle < -(2/3) * math.pi and angle >= -math.pi:
+            virtual_coords[nb] = (virtual_x + 1 if odd else virtual_x, virtual_y - 1)
+            odd_or_even[nb] = not odd
         else:
             raise Exception("Angle is not within the boundaries of pi")
+    
+    # Recursively go through unvisited neighbours
+    for nb in neighbours:
+        if nb not in visited:
+            virtual_coords = create_hexagon_grid(nb, new_coords, adjacent_hexagon, virtual_coords, visited, odd_or_even)
 
+    return virtual_coords
+
+def normalize_virtual_coords(virtual_coords, anchor):
+    smallest_x = math.inf
+    smallest_y = math.inf
+
+    for coords in virtual_coords.values():
+        x, y = coords
+        if x < smallest_x:
+            smallest_x = x
+        if y < smallest_y:
+            smallest_y = y
+
+    # This makes sure that the anchor is in an "odd" row
+    if (virtual_coords[anchor][1] - smallest_y) % 2 == 1:
+        smallest_y-=1
+
+    result = {}
+    for key, v_coords in virtual_coords.items():
+        x, y = v_coords
+        result[x - smallest_x, y - smallest_y] = key
+
+    return result
+
+    
 def find_adjacent_hexagon(coordinates, filter_threshold = 0.1):
     smallest_distance = math.inf
     distances = {}
@@ -65,20 +117,6 @@ def find_adjacent_hexagon(coordinates, filter_threshold = 0.1):
     threshold = filter_threshold * smallest_distance
     adjacent_hexagon = [key for key, value in distances.items() if abs(value - smallest_distance) <= threshold]
     return adjacent_hexagon
-
-def rotate_point(coord, angle):
-    x, y = coord
-    rotated_x = x * np.cos(-angle) - y * np.sin(-angle)
-    rotated_y = x * np.sin(-angle) + y * np.cos(-angle)
-    return rotated_x, rotated_y
-
-def rotate_points_around_anchor(coordinates, anchor, angle, img):
-    translated_coords = [(x - anchor[0], y - anchor[1]) for x, y in coordinates]
-    rotated_coords = [rotate_point(coord, angle) for coord in translated_coords]
-    new_coords = [(int(x + anchor[0]), int(y + anchor[1])) for x,y in rotated_coords]
-    result = {original: rotated for original, rotated in zip(coordinates, new_coords)}
-    result[anchor] = anchor
-    return result
 
 def find_anchor(adjacent_hexagon):
     flat_list = [item for sublist in adjacent_hexagon for item in sublist]
@@ -95,6 +133,23 @@ def find_neighbours(adjacent_hexagon, hex):
             neighbours.append(coord_pair[0])
         
     return neighbours
+
+def calculate_distance(coord1, coord2):
+    return math.sqrt(pow((coord1[0] - coord2[0]), 2) + pow((coord1[1] - coord2[1]), 2))
+
+def rotate_point(coord, angle):
+    x, y = coord
+    rotated_x = x * np.cos(-angle) - y * np.sin(-angle)
+    rotated_y = x * np.sin(-angle) + y * np.cos(-angle)
+    return rotated_x, rotated_y
+
+def rotate_points_around_anchor(coordinates, anchor, angle, img):
+    translated_coords = [(x - anchor[0], y - anchor[1]) for x, y in coordinates]
+    rotated_coords = [rotate_point(coord, angle) for coord in translated_coords]
+    new_coords = [(int(x + anchor[0]), int(y + anchor[1])) for x,y in rotated_coords]
+    result = {original: rotated for original, rotated in zip(coordinates, new_coords)}
+    result[anchor] = anchor
+    return result
         
 def calculate_angle(anchor, point):
     dx = point[0] - anchor[0]
@@ -116,9 +171,9 @@ def find_rotation_angle(anchor, neighbours):
 
     return min_angle
 
-def calculate_distance(coord1, coord2):
-    return math.sqrt(pow((coord1[0] - coord2[0]), 2) + pow((coord1[1] - coord2[1]), 2))
 
+
+# Temporary code to display images:
 def show_image(img):
     img_copy = img.copy()
     resized = resize_img(img_copy)
@@ -131,3 +186,28 @@ def resize_img(raw_img, target_size = 800):
    ratio = min(target_size / w, target_size / h)
    resized = cv2.resize(raw_img, (int(w * ratio), int(h * ratio)))
    return resized
+
+# Temporary code to draw the hexagon:
+def draw_hexagon(ax, center, size):
+    angles = np.linspace(0, 2*np.pi, 7)
+    x = center[0] + size * np.cos(angles)
+    y = center[1] + size * np.sin(angles)
+    ax.fill(x, y, edgecolor='black', linewidth=1, facecolor='lightgray')
+
+def draw_grid(grid, hex_size = 1.0):
+    fig, ax = plt.subplots()
+    ax.set_aspect('equal')
+    ax.set_axis_off()
+    print(grid)
+    for row in range(5):
+        for col in range(5):
+            if (row, col) in grid.keys():
+                x = col * 3/2 * hex_size
+                y = row * np.sqrt(3) * hex_size
+                if col % 2 != 0:
+                    y += np.sqrt(3) / 2 * hex_size
+                draw_hexagon(ax, (x, y), hex_size)
+                ax.text(x, y, grid[(row, col)], ha='center', va='center', color='black')
+
+            
+    plt.show()

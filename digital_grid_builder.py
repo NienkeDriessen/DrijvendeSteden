@@ -198,7 +198,6 @@ def draw_grid(grid, hex_size = 1.0):
     fig, ax = plt.subplots()
     ax.set_aspect('equal')
     ax.set_axis_off()
-    print(grid)
     for row in range(5):
         for col in range(5):
             if (row, col) in grid.keys():
@@ -207,7 +206,8 @@ def draw_grid(grid, hex_size = 1.0):
                 if col % 2 != 0:
                     y += np.sqrt(3) / 2 * hex_size
                 draw_hexagon(ax, (x, y), hex_size)
-                ax.text(x, y, grid[(row, col)], ha='center', va='center', color='black')
+                text = str(grid[(row, col)]) + "\n->\n" + str((row, col))
+                ax.text(x, y, text, ha='center', va='center', color='black')
 
             
     plt.show()

@@ -1,5 +1,7 @@
 import cv2
 import numpy as np
+from digital_grid_builder import build_hexagon_grid
+import matplotlib.pyplot as plt
 
 def show_image(img):
     img_copy = img.copy()
@@ -64,8 +66,26 @@ def find_contours(img):
             cv2.putText(img_copy, str(coordinates), coordinates, cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.5, (0, 0, 0), 1) 
             cv2.drawContours(img_copy, [contour], 0, (0, 0, 255), 2)
             shapes[coordinates] = []
-    show_image(img_copy)
+    # show_image(img_copy)
     return shapes, img_copy
+
+
+def plot_coords(coords):
+    x_values = [coord[0] for coord in coords]
+    y_values = [coord[1] for coord in coords]
+
+    plt.scatter(x_values, y_values, color='blue', label='coords')
+
+    plt.xlabel('X-axis')
+    plt.ylabel('Y-axis')
+    plt.title('Plot of Coordinates')
+
+    plt.grid(True)
+    plt.gca().set_aspect('equal', adjustable='box')
+    # plt.gca().invert_xaxis()
+    plt.gca().invert_yaxis()
+    plt.legend()
+    plt.show()
 
 img = cv2.imread('resources/stad1.png')
 img_copy = img.copy()
@@ -87,41 +107,5 @@ brown_shapes, brown_contour_image = find_contours(brown_only)
 red_shapes, red_contour_image = find_contours(red_only)
 
 
-
-# def remove_gray(img):
-#     blur = cv2.blur(img, (5,5))
-#     blur0 = cv2.medianBlur(blur,5)
-#     blur1 = cv2.GaussianBlur(blur0,(5,5),0)
-#     blur2 = cv2.bilateralFilter(blur1,9,75,75)
-#     hsv = cv2.cvtColor(blur2, cv2.COLOR_BGR2HSV)
-#     low_gray = np.array([0, 0, 0])
-#     high_gray = np.array([180, 80, 220])
-#     mask = cv2.inRange(hsv, low_gray, high_gray)
-#     mask = cv2.bitwise_not(mask)
-#     result = cv2.bitwise_and(img, img, mask=mask)
-#     return result
-
-# def find_edges(img):
-#     _, threshold = cv2.threshold(img, 1, 255, cv2.THRESH_BINARY)
-#     kernel = np.ones((3,3),np.uint8)
-#     eroded = cv2.erode(threshold, kernel, iterations=1)
-#     mask = cv2.cvtColor(eroded, cv2.COLOR_BGR2GRAY)
-
-#     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-#     kernel_size = 3
-#     blur_gray = cv2.GaussianBlur(gray,(kernel_size, kernel_size),0)
-
-#     edges = cv2.Canny(blur_gray, 50, 100)
-#     filtered_edges = cv2.bitwise_and(edges, edges, mask=mask)
-
-#     show_image(filtered_edges)
-#     dilated = cv2.dilate(edges, kernel, iterations=1)
-#     show_image(dilated)
-
-#     return dilated
-
-
-
-
-# dilated = find_edges(gray_only)
-# # show_image(dilated)
+shapes = {**green_shapes, **blue_shapes, **yellow_shapes, **orange_shapes, **white_shapes, **brown_shapes, **red_shapes}
+hexagon_grid = build_hexagon_grid(shapes.keys(), img)

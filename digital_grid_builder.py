@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 def build_hexagon_grid(coordinates, img):
     # Find all the direct neighbours
     adjacent_hexagon = find_adjacent_hexagon(coordinates)
+    print(adjacent_hexagon)
 
     # Create an anchor to serve as a starting point
     anchor = find_anchor(adjacent_hexagon)
@@ -103,7 +104,7 @@ def normalize_virtual_coords(virtual_coords, anchor):
     return result
 
     
-def find_adjacent_hexagon(coordinates, filter_threshold = 0.1):
+def find_adjacent_hexagon(coordinates, filter_threshold = 0.5):
     smallest_distance = math.inf
     distances = {}
 
@@ -198,16 +199,16 @@ def draw_grid(grid, hex_size = 1.0):
     fig, ax = plt.subplots()
     ax.set_aspect('equal')
     ax.set_axis_off()
-    for row in range(5):
-        for col in range(5):
+    for row in range(50):
+        for col in range(50):
             if (row, col) in grid.keys():
                 x = col * 3/2 * hex_size
                 y = row * np.sqrt(3) * hex_size
                 if col % 2 != 0:
                     y += np.sqrt(3) / 2 * hex_size
                 draw_hexagon(ax, (x, y), hex_size)
-                text = str(grid[(row, col)]) + "\n->\n" + str((row, col))
-                ax.text(x, y, text, ha='center', va='center', color='black')
+                # text = str(grid[(row, col)]) + "\n->\n" + str((row, col))
+                # ax.text(x, y, text, ha='center', va='center', color='black')
 
             
     plt.show()

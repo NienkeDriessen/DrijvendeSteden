@@ -104,7 +104,7 @@ def normalize_virtual_coords(virtual_coords, anchor):
     return result
 
     
-def find_adjacent_hexagon(coordinates, filter_threshold = 0.5):
+def find_adjacent_hexagon(coordinates, filter_threshold = 0.6):
     smallest_distance = math.inf
     distances = {}
 

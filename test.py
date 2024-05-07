@@ -56,8 +56,8 @@ def find_contours(img):
         area = cv2.contourArea(contour)
         _,_,w,h = cv2.boundingRect(contour)
         bounding_area = w * h
-        max_ratio = 2
-        if 1000 <= area <= 5000 and bounding_area < 3 * area:
+        max_ratio = 4
+        if 1000 <= area <= 8000 and bounding_area < max_ratio * area:
             M = cv2.moments(contour) 
             if M['m00'] != 0.0: 
                 x = int(M['m10']/M['m00']) 
@@ -66,7 +66,7 @@ def find_contours(img):
             cv2.putText(img_copy, str(coordinates), coordinates, cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.5, (0, 0, 0), 1) 
             cv2.drawContours(img_copy, [contour], 0, (0, 0, 255), 2)
             shapes[coordinates] = []
-    # show_image(img_copy)
+    show_image(img_copy)
     return shapes, img_copy
 
 
@@ -82,7 +82,6 @@ def plot_coords(coords):
 
     plt.grid(True)
     plt.gca().set_aspect('equal', adjustable='box')
-    # plt.gca().invert_xaxis()
     plt.gca().invert_yaxis()
     plt.legend()
     plt.show()

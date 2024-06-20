@@ -60,6 +60,3 @@ def find_buildings(img):
     buildings = find_contours(no_black)
     return buildings
 
-for index in range(0, 1):
-    find_buildings(cv2.imread(f'resources/testing2/{index}.jpeg'))
-

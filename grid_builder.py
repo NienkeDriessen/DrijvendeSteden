@@ -3,11 +3,14 @@ import cv2
 from collections import Counter
 import numpy as np
 import matplotlib.pyplot as plt
+from util import show_image
 
-def build_hexagon_grid(coordinates, img):
+def build_grid(recognized_buildings):
+    coordinates = recognized_buildings.keys()
+    print(coordinates)
+
     # Find all the direct neighbours
     adjacent_hexagon = find_adjacent_hexagon(coordinates)
-    print(adjacent_hexagon)
 
     # Create an anchor to serve as a starting point
     anchor = find_anchor(adjacent_hexagon)
@@ -19,7 +22,7 @@ def build_hexagon_grid(coordinates, img):
     angle = find_rotation_angle(anchor, anchor_neighbours)
 
     # Rotate all the coordinates around the anchor
-    new_coords = rotate_points_around_anchor(coordinates, anchor, angle, img)
+    new_coords = rotate_points_around_anchor(coordinates, anchor, angle)
 
     # Recursively create a grid starting at the anchor
     virtual_coords = {anchor : (250, 250)}
@@ -30,8 +33,10 @@ def build_hexagon_grid(coordinates, img):
     # This grid contains virtual coordinates pointing to original coordinates (which serve as keys)
     grid = normalize_virtual_coords(virtual_coords, anchor)
 
+    final_grid = update_coords(recognized_buildings, grid)
+
     # Replace this with the code to generate 3d models:
-    draw_grid(grid)
+    draw_grid(final_grid)
 
 def create_hexagon_grid(current_hexagon, new_coords, adjacent_hexagon, virtual_coords, visited, odd_or_even):
     visited.append(current_hexagon)
@@ -103,7 +108,16 @@ def normalize_virtual_coords(virtual_coords, anchor):
 
     return result
 
-    
+def update_coords(recognized_buildings, grid):
+    final_grid = {}
+    for new_coords, old_coords in grid.items():
+        print(new_coords)
+        print(old_coords)
+        final_grid[new_coords] = recognized_buildings[old_coords]
+
+    return final_grid
+
+
 def find_adjacent_hexagon(coordinates, filter_threshold = 0.6):
     smallest_distance = math.inf
     distances = {}
@@ -144,7 +158,7 @@ def rotate_point(coord, angle):
     rotated_y = x * np.sin(-angle) + y * np.cos(-angle)
     return rotated_x, rotated_y
 
-def rotate_points_around_anchor(coordinates, anchor, angle, img):
+def rotate_points_around_anchor(coordinates, anchor, angle):
     translated_coords = [(x - anchor[0], y - anchor[1]) for x, y in coordinates]
     rotated_coords = [rotate_point(coord, angle) for coord in translated_coords]
     new_coords = [(int(x + anchor[0]), int(y + anchor[1])) for x,y in rotated_coords]
@@ -172,22 +186,6 @@ def find_rotation_angle(anchor, neighbours):
 
     return min_angle
 
-
-
-# Temporary code to display images:
-def show_image(img):
-    img_copy = img.copy()
-    resized = resize_img(img_copy)
-    cv2.imshow('shapes', resized) 
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-
-def resize_img(raw_img, target_size = 800):
-   h, w = raw_img.shape[:2]
-   ratio = min(target_size / w, target_size / h)
-   resized = cv2.resize(raw_img, (int(w * ratio), int(h * ratio)))
-   return resized
-
 # Temporary code to draw the hexagon:
 def draw_hexagon(ax, center, size):
     angles = np.linspace(0, 2*np.pi, 7)
@@ -207,8 +205,8 @@ def draw_grid(grid, hex_size = 1.0):
                 if col % 2 != 0:
                     y += np.sqrt(3) / 2 * hex_size
                 draw_hexagon(ax, (x, y), hex_size)
-                # text = str(grid[(row, col)]) + "\n->\n" + str((row, col))
-                # ax.text(x, y, text, ha='center', va='center', color='black')
+                text = grid[(row, col)]
+                ax.text(x, y, text, ha='center', va='center', color='black')
 
             
     plt.show()

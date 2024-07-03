@@ -34,15 +34,22 @@ export function createCity(scene) {
     const spacing = 5; // Spacing between cubes
     
     const loader = new GLTFLoader();
-    loader.load( 'buildings/building_02/scene.gltf', function ( gltf ) {
+    loader.load( 'buildings/a5.gltf', function ( gltf ) {
         for (let row = 0; row < rows; row++) {
             for (let col = 0; col < cols; col++) {
                 const model = gltf.scene.clone();
-                
+                model.scale.set(50, 50, 50);
+
+                const blueMaterial = new THREE.MeshStandardMaterial({ color: 0x0000ff });
+                model.traverse((child) => {
+                    if (child.isMesh) {
+                      child.material = blueMaterial;
+                    }
+                  });
     
                 model.position.set(
                     col * spacing - (cols * spacing) / 2, 
-                    1.1,
+                    0.3,
                     row * spacing - (rows * spacing) / 2);
                 
                 city.add(model)

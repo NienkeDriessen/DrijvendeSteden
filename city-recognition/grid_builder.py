@@ -4,6 +4,7 @@ from collections import Counter
 import numpy as np
 import matplotlib.pyplot as plt
 from util import show_image
+import json
 
 def build_grid(recognized_buildings):
     coordinates = recognized_buildings.keys()
@@ -35,6 +36,7 @@ def build_grid(recognized_buildings):
 
     final_grid = update_coords(recognized_buildings, grid)
 
+    json_grid = parse_grid_to_json(final_grid)
     # Replace this with the code to generate 3d models:
     draw_grid(final_grid)
 
@@ -210,3 +212,10 @@ def draw_grid(grid, hex_size = 1.0):
 
             
     plt.show()
+
+
+def parse_grid_to_json(final_grid):
+    stringified_keys = {str(key) : value for key, value in final_grid.items()}
+    grid_json = json.dumps(stringified_keys)
+    print(grid_json)
+    return grid_json

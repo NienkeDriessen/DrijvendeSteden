@@ -32,8 +32,8 @@ export function createCity(scene) {
                             z += horizontal_offset;
                         }
 
-                        const hexagon = createHexagon(hex_size, model)
-                        hexagon.position.set(x, 0, z);
+                        const hexagon = createHexagon(hex_size, model, city_definition[[row, col]])
+                        hexagon.position.set(-x, 0, z);
                         city.add(hexagon)
                     }
                     
@@ -48,7 +48,10 @@ export function createCity(scene) {
     return city
 }
 
-function createHexagon(hex_size, model) {
+function createHexagon(hex_size, model, color) {
+    const hexagon = new THREE.Group();
+
+    // Create the platform:
     const height = 1;
     const radialSegments = 6;
 
@@ -61,8 +64,48 @@ function createHexagon(hex_size, model) {
         materialTop,
         materialTop
     ];
+    const platform = new THREE.Mesh( geometry, materials );
 
-    const hexagon = new THREE.Mesh( geometry, materials );
+    hexagon.add(platform)
+    
+    // Add the model on top of the platform:
+    model.scale.set(50, 50, 50);
+
+    let material = null;
+    switch (color) {
+        case "RED":
+            material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+            break;
+        case "GREEN":
+            material = new THREE.MeshStandardMaterial({ color: 0x143c14 });
+            break;
+        case "BLUE":
+            material = new THREE.MeshStandardMaterial({ color: 0x0000ff });
+            break;
+        case "YELLOW":
+            material = new THREE.MeshStandardMaterial({ color: 0xffff00 });
+            break;
+        case "ORANGE":
+            material = new THREE.MeshStandardMaterial({ color: 0xff7d00 });
+            break;
+        case "BROWN":
+            material = new THREE.MeshStandardMaterial({ color: 0x50281e });
+            break;
+        case "WHITE":
+            material = new THREE.MeshStandardMaterial({ color: 0xffffff });
+            break;
+        default:
+            material = new THREE.MeshStandardMaterial({ color: 0x000000 });
+            break;
+    }
+
+    model.traverse((child) => {
+        if (child.isMesh) {
+            child.material = material;
+        }
+    });
+
+    hexagon.add(model)
 
     return hexagon;
 }

@@ -8,10 +8,9 @@ import json
 
 def build_grid(recognized_buildings):
     coordinates = recognized_buildings.keys()
-    print(coordinates)
 
     # Find all the direct neighbours
-    adjacent_hexagon = find_adjacent_hexagon(coordinates)
+    adjacent_hexagon, average_distance = find_adjacent_hexagon(coordinates)
 
     # Create an anchor to serve as a starting point
     anchor = find_anchor(adjacent_hexagon)
@@ -21,6 +20,7 @@ def build_grid(recognized_buildings):
 
     # Calculate a rotation angle which aligns the hexagons
     angle = find_rotation_angle(anchor, anchor_neighbours)
+    print(angle)
 
     # Rotate all the coordinates around the anchor
     new_coords = rotate_points_around_anchor(coordinates, anchor, angle)
@@ -30,6 +30,18 @@ def build_grid(recognized_buildings):
     visited = [anchor]
     odd_or_even = {anchor : False}
     virtual_coords = create_hexagon_grid(anchor, new_coords, adjacent_hexagon, virtual_coords, visited, odd_or_even)
+
+    # ======
+    unvisited = coordinates - visited
+    sub_anchor = next(iter(unvisited))
+    
+    sa_coords, ooe = approximate_coords(sub_anchor, anchor, new_coords, average_distance)
+    virtual_coords[sub_anchor] = sa_coords
+    odd_or_even[sub_anchor] = ooe
+    visited.append(sub_anchor)
+    virtual_coords = create_hexagon_grid(sub_anchor, new_coords, adjacent_hexagon, virtual_coords, visited, odd_or_even)
+
+    # ======
 
     # This grid contains virtual coordinates pointing to original coordinates (which serve as keys)
     grid = normalize_virtual_coords(virtual_coords, anchor)
@@ -113,8 +125,8 @@ def normalize_virtual_coords(virtual_coords, anchor):
 def update_coords(recognized_buildings, grid):
     final_grid = {}
     for new_coords, old_coords in grid.items():
-        print(new_coords)
-        print(old_coords)
+        # print(new_coords)
+        # print(old_coords)
         final_grid[new_coords] = recognized_buildings[old_coords]
 
     return final_grid
@@ -133,7 +145,13 @@ def find_adjacent_hexagon(coordinates, filter_threshold = 0.6):
     
     threshold = filter_threshold * smallest_distance
     adjacent_hexagon = [key for key, value in distances.items() if abs(value - smallest_distance) <= threshold]
-    return adjacent_hexagon
+
+    distance_sum = 0
+    for key in adjacent_hexagon:
+        distance_sum += distances[key]
+    average_distance = distance_sum / len(adjacent_hexagon)
+
+    return adjacent_hexagon, average_distance
 
 def find_anchor(adjacent_hexagon):
     flat_list = [item for sublist in adjacent_hexagon for item in sublist]
@@ -188,6 +206,33 @@ def find_rotation_angle(anchor, neighbours):
 
     return min_angle
 
+def approximate_coords(sub_anchor, anchor, new_coords, average_distance):
+    odd_or_even = False
+    coords_a = new_coords[anchor]
+    coords_b = new_coords[sub_anchor]
+    distance_x = coords_b[0] - coords_a[0]
+    distance_y = coords_b[1] - coords_a[1]
+
+    dh = average_distance
+    do = average_distance / 2
+    dw = math.sqrt(pow(dh, 2) - pow(do, 2))
+
+    width_shift = round(distance_x / dw)
+    if width_shift % 2 != 0:
+        odd_or_even = True
+        if distance_y < 0:
+            distance_y -= do
+        else:
+            distance_y += do
+
+    height_shift = round(distance_y / dh)
+    new_coords = (250 - height_shift, 250 + width_shift)
+
+    return new_coords, odd_or_even
+
+
+
+
 # Temporary code to draw the hexagon:
 def draw_hexagon(ax, center, size):
     angles = np.linspace(0, 2*np.pi, 7)
@@ -207,7 +252,8 @@ def draw_grid(grid, hex_size = 1.0):
                 if col % 2 != 0:
                     y += np.sqrt(3) / 2 * hex_size
                 draw_hexagon(ax, (x, y), hex_size)
-                text = grid[(row, col)]
+                # text = grid[(row, col)]
+                text = (row, col)
                 ax.text(x, y, text, ha='center', va='center', color='black')
 
             
@@ -217,5 +263,4 @@ def draw_grid(grid, hex_size = 1.0):
 def parse_grid_to_json(final_grid):
     stringified_keys = {str(key) : value for key, value in final_grid.items()}
     grid_json = json.dumps(stringified_keys)
-    print(grid_json)
     return grid_json

@@ -3,7 +3,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { load_city_definition } from './util';
 
 
-export function createCity(scene) {
+export async function createCity(scene) {
     const padding = 0.2;
     const hex_size = 3;
 
@@ -11,7 +11,7 @@ export function createCity(scene) {
     const horizontal_distance = (hex_size + padding) * Math.sqrt(3);
     const horizontal_offset = (hex_size + padding) * (Math.sqrt(3) / 2); 
 
-    const { city_definition, numRows, numCols } = load_city_definition()
+    const { city_definition, numRows, numCols } = await load_city_definition()
 
     const city = new THREE.Group();
 

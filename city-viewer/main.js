@@ -21,7 +21,7 @@ const sky = createSky(scene)
 createSun(scene, renderer, sky, water)
 
 // Create city
-const city = createCity(scene)
+const city = await createCity(scene)
 
 function createControls() {
     const controls = new OrbitControls(camera, renderer.domElement);

@@ -45,7 +45,7 @@ def find_contours(img):
             cv2.putText(img_copy, str(coordinates), coordinates, cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.5, (0, 0, 0), 1) 
             cv2.drawContours(img_copy, [contour], 0, (255, 0, 255), 4)
             buildings[coordinates] = crop_contour(img, contour)
-    show_image(img_copy)
+    # show_image(img_copy)
     return buildings
 
 def crop_contour(img, contour):

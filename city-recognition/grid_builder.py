@@ -50,7 +50,9 @@ def build_grid(recognized_buildings):
 
     json_grid = parse_grid_to_json(final_grid)
     # Replace this with the code to generate 3d models:
-    draw_grid(final_grid)
+    # draw_grid(final_grid)
+
+    return json_grid
 
 def create_hexagon_grid(current_hexagon, new_coords, adjacent_hexagon, virtual_coords, visited, odd_or_even):
     visited.append(current_hexagon)
@@ -240,24 +242,24 @@ def draw_hexagon(ax, center, size):
     y = center[1] + size * np.sin(angles)
     ax.fill(x, y, edgecolor='black', linewidth=1, facecolor='lightgray')
 
-def draw_grid(grid, hex_size = 1.0):
-    fig, ax = plt.subplots()
-    ax.set_aspect('equal')
-    ax.set_axis_off()
-    for row in range(50):
-        for col in range(50):
-            if (row, col) in grid.keys():
-                x = col * 3/2 * hex_size
-                y = row * np.sqrt(3) * hex_size
-                if col % 2 != 0:
-                    y += np.sqrt(3) / 2 * hex_size
-                draw_hexagon(ax, (x, y), hex_size)
-                # text = grid[(row, col)]
-                text = (row, col)
-                ax.text(x, y, text, ha='center', va='center', color='black')
+# def draw_grid(grid, hex_size = 1.0):
+#     fig, ax = plt.subplots()
+#     ax.set_aspect('equal')
+#     ax.set_axis_off()
+#     for row in range(50):
+#         for col in range(50):
+#             if (row, col) in grid.keys():
+#                 x = col * 3/2 * hex_size
+#                 y = row * np.sqrt(3) * hex_size
+#                 if col % 2 != 0:
+#                     y += np.sqrt(3) / 2 * hex_size
+#                 draw_hexagon(ax, (x, y), hex_size)
+#                 # text = grid[(row, col)]
+#                 text = (row, col)
+#                 ax.text(x, y, text, ha='center', va='center', color='black')
 
             
-    plt.show()
+#     plt.show()
 
 
 def parse_grid_to_json(final_grid):

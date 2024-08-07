@@ -28,24 +28,18 @@ export async function load_city_definition() {
 async function retrieveData() {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
-    const id = urlParams.get('id')
+    let id = urlParams.get('id')
+    if (id == null) {
+        id = 1
+    }
 
     const database = getDatabase(app);
-
     const dataRef = ref(database, 'data/' + id);
 
     try {
-        // Fetch the data
         const snapshot = await get(dataRef);
-
-        if (snapshot.exists()) {
-            return snapshot.val();
-        } else {
-            console.log("Key was not found")
-            return null;
-        }
+        return snapshot.val();
     } catch (error) {
-        // Handle any errors
         console.error('Error retrieving data:', error);
         return null;
     }

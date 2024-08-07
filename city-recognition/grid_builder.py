@@ -52,7 +52,7 @@ def build_grid(recognized_buildings):
     # Replace this with the code to generate 3d models:
     # draw_grid(final_grid)
 
-    return json_grid
+    return final_grid
 
 def create_hexagon_grid(current_hexagon, new_coords, adjacent_hexagon, virtual_coords, visited, odd_or_even):
     visited.append(current_hexagon)
@@ -129,7 +129,7 @@ def update_coords(recognized_buildings, grid):
     for new_coords, old_coords in grid.items():
         # print(new_coords)
         # print(old_coords)
-        final_grid[new_coords] = recognized_buildings[old_coords]
+        final_grid[str(new_coords)] = recognized_buildings[old_coords]
 
     return final_grid
 

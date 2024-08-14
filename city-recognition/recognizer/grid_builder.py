@@ -218,7 +218,7 @@ def approximate_coords(sub_anchor, anchor, new_coords, average_distance):
             distance_y -= do
 
     height_shift = round(distance_y / dh)
-    new_coords = (250 + height_shift, 250 + width_shift)
+    new_coords = (250 + width_shift, 250 + height_shift)
 
     return new_coords, odd_or_even
  

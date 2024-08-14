@@ -7,13 +7,59 @@ export async function createCity(scene) {
     const padding = 0.2;
     const hex_size = 3;
 
-    const vertical_distance = (hex_size + padding) * 1.5;
-    const horizontal_distance = (hex_size + padding) * Math.sqrt(3);
-    const horizontal_offset = (hex_size + padding) * (Math.sqrt(3) / 2); 
+    const horizontal_distance = (hex_size + padding) * 1.5;
+    const vertical_distance = (hex_size + padding) * Math.sqrt(3);
+    const vertical_offset = (hex_size + padding) * (Math.sqrt(3) / 2); 
+
+    
 
     const { city_definition, numRows, numCols } = await load_city_definition()
 
     const city = new THREE.Group();
+
+    // const loader = new GLTFLoader();
+    //     loader.load( 'buildings/a5.gltf', function ( gltf ) {
+            
+    //         for (let row = 0; row < 5; row++) {
+    //             for (let col = 0; col < 2; col++) {
+    //                 const model = gltf.scene.clone();
+    //                 let x = row * horizontal_distance;
+    //                 let z = col * vertical_distance;
+                    
+    //                 if (row % 2 !== 0) {
+    //                     z += vertical_offset;
+    //                 }
+
+
+    //                 const hexagon = createHexagon(hex_size, model, "WHITE")
+    //                 hexagon.position.set(x, 0, z);
+    //                 city.add(hexagon)
+
+    //                 // if (col % 2 !== 0) {
+    //                 //     z += horizontal_offset;
+    //                 // }
+
+    //                 // if ([row,col] in city_definition){
+    //                 //     const model = gltf.scene.clone();
+
+    //                 //     let x = col * vertical_distance;
+    //                 //     let z = row * horizontal_distance;
+
+    //                 //     if (col % 2 !== 0) {
+    //                 //         z += horizontal_offset;
+    //                 //     }
+
+    //                 //     const hexagon = createHexagon(hex_size, model, "WHITE")
+    //                 //     hexagon.position.set(x, 0, z);
+    //                 //     city.add(hexagon)
+    //                 // }
+                    
+    //             }
+    //         }
+
+    //     }, undefined, function ( error ) {
+    //     console.error( error );
+    // } );
 
     // TODO: Find a better way to load each model and then pass a clone to the createHexagon
     const loader = new GLTFLoader();
@@ -25,15 +71,15 @@ export async function createCity(scene) {
                     if ([row,col] in city_definition){
                         const model = gltf.scene.clone();
 
-                        let x = col * vertical_distance;
-                        let z = row * horizontal_distance;
+                        let x = row * horizontal_distance;
+                        let z = col * vertical_distance;
 
-                        if (col % 2 !== 0) {
-                            z += horizontal_offset;
+                        if (row % 2 !== 0) {
+                            z += vertical_offset;
                         }
 
                         const hexagon = createHexagon(hex_size, model, city_definition[[row, col]])
-                        hexagon.position.set(-x, 0, z);
+                        hexagon.position.set(x, 0, z);
                         city.add(hexagon)
                     }
                     

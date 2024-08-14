@@ -32,7 +32,7 @@ def create_result(image):
     return result['name']
 
 def create_link(id):
-    link = f"https://66b39d39708f9b1e02b6d9eb--singular-granita-604f65.netlify.app/?id={id}"
+    link = f"https://singular-granita-604f65.netlify.app//?id={id}"
 
     qr = qrcode.QRCode(version=3, box_size=20, border=10, error_correction=qrcode.constants.ERROR_CORRECT_H)
     qr.add_data(link)

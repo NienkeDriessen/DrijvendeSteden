@@ -17,7 +17,6 @@ def build_grid(recognized_buildings):
 
     # Calculate a rotation angle which aligns the hexagons
     angle = find_rotation_angle(anchor, anchor_neighbours)
-    print(angle)
 
     # Rotate all the coordinates around the anchor
     new_coords = rotate_points_around_anchor(coordinates, anchor, angle)
@@ -28,26 +27,20 @@ def build_grid(recognized_buildings):
     odd_or_even = {anchor : False}
     virtual_coords = create_hexagon_grid(anchor, new_coords, adjacent_hexagon, virtual_coords, visited, odd_or_even)
 
-    # ======
-    unvisited = coordinates - visited
-    sub_anchor = next(iter(unvisited))
-    
-    sa_coords, ooe = approximate_coords(sub_anchor, anchor, new_coords, average_distance)
-    virtual_coords[sub_anchor] = sa_coords
-    odd_or_even[sub_anchor] = ooe
-    visited.append(sub_anchor)
-    virtual_coords = create_hexagon_grid(sub_anchor, new_coords, adjacent_hexagon, virtual_coords, visited, odd_or_even)
-
-    # ======
+    while len(visited) < len(coordinates):
+        unvisited = coordinates - visited
+        sub_anchor = next(iter(unvisited))
+        
+        sa_coords, ooe = approximate_coords(sub_anchor, anchor, new_coords, average_distance)
+        virtual_coords[sub_anchor] = sa_coords
+        odd_or_even[sub_anchor] = ooe
+        visited.append(sub_anchor)
+        virtual_coords = create_hexagon_grid(sub_anchor, new_coords, adjacent_hexagon, virtual_coords, visited, odd_or_even)
 
     # This grid contains virtual coordinates pointing to original coordinates (which serve as keys)
     grid = normalize_virtual_coords(virtual_coords, anchor)
 
     final_grid = update_coords(recognized_buildings, grid)
-
-    json_grid = parse_grid_to_json(final_grid)
-    # Replace this with the code to generate 3d models:
-    # draw_grid(final_grid)
 
     return final_grid
 
@@ -67,27 +60,27 @@ def create_hexagon_grid(current_hexagon, new_coords, adjacent_hexagon, virtual_c
 
         # South East Neighbour
         if angle > 0 and angle <= math.pi / 3:
-            virtual_coords[nb] = (virtual_x if odd else virtual_x - 1, virtual_y + 1)
+            virtual_coords[nb] = (virtual_x + 1, virtual_y if odd else virtual_y + 1)
             odd_or_even[nb] = not odd
         # South Neighbour
         elif angle > (1/3) * math.pi and angle <= (2/3) * math.pi:
-            virtual_coords[nb] = (virtual_x - 1, virtual_y)
+            virtual_coords[nb] = (virtual_x, virtual_y + 1)
             odd_or_even[nb] = odd
         # South West Neighbour
         elif angle > (2/3) * math.pi and angle <= math.pi:
-            virtual_coords[nb] = (virtual_x if odd else virtual_x - 1, virtual_y - 1)
+            virtual_coords[nb] = (virtual_x - 1, virtual_y if odd else virtual_y + 1)
             odd_or_even[nb] = not odd
         # North East Neighbour
         elif angle < 0 and angle >= -math.pi / 3:
-            virtual_coords[nb] = (virtual_x + 1 if odd else virtual_x, virtual_y + 1)
+            virtual_coords[nb] = (virtual_x + 1, virtual_y - 1 if odd else virtual_y)
             odd_or_even[nb] = not odd
         # North Neighbour
         elif angle < -(1/3) * math.pi and angle >= -(2/3) * math.pi:
-            virtual_coords[nb] = (virtual_x + 1, virtual_y)
+            virtual_coords[nb] = (virtual_x, virtual_y - 1)
             odd_or_even[nb] = odd
         # North West Neighbour
         elif angle < -(2/3) * math.pi and angle >= -math.pi:
-            virtual_coords[nb] = (virtual_x + 1 if odd else virtual_x, virtual_y - 1)
+            virtual_coords[nb] = (virtual_x - 1, virtual_y - 1 if odd else virtual_y)
             odd_or_even[nb] = not odd
         else:
             raise Exception("Angle is not within the boundaries of pi")

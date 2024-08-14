@@ -7,14 +7,18 @@ import { createCity } from './js/city';
 
 async function init() {
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+    const camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 1000 );
 
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize( window.innerWidth, window.innerHeight );
     document.body.appendChild( renderer.domElement );
 
-    camera.position.set(0, 50, 80);
+
     const controls = createControls()
+    
+    controls.target.set(40,0,40)
+    camera.position.set(0, 120, 150);
+
 
     // Create environment
     const water = createOcean(scene)
@@ -30,7 +34,7 @@ async function init() {
         controls.dampingFactor = 0.25;
         controls.screenSpacePanning = false;
         controls.minDistance = 20;
-        controls.maxDistance = 80;
+        controls.maxDistance = 120;
         controls.maxPolarAngle = (Math.PI / 2) - 0.2;
         
         return controls
@@ -54,6 +58,8 @@ async function init() {
 
         requestAnimationFrame(animate);
         renderer.render(scene, camera);
+        console.log("a ",controls.target)
+        console.log(camera.position)
     }
 
     animate();

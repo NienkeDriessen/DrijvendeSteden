@@ -1,5 +1,5 @@
 from flask import Flask, request, render_template, redirect
-from recognizer import recognize_city
+from recognizer.recognizer import recognize_city
 from firebase import firebase
 import os
 import qrcode

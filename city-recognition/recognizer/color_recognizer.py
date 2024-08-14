@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 from sklearn.cluster import KMeans
-from util import Color
+from .util import Color
 
 def closest_color_name(color):
     closest_name = None

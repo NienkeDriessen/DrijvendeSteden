@@ -1,9 +1,6 @@
 import math
-import cv2 
 from collections import Counter
 import numpy as np
-import matplotlib.pyplot as plt
-from util import show_image
 import json
 
 def build_grid(recognized_buildings):

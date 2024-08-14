@@ -1,13 +1,9 @@
-import cv2
-import numpy as np
-import os
-from matplotlib import pyplot as plt
-from util import show_image, Color
-from color_recognizer import get_color
+from .color_recognizer import get_color
 
+# TODO: recognize a building based on its color
 def recognize_building(building):
     color = get_color(building)
-    building = color # TODO: recognize a building based on its color
+    building = color 
     return building
 
 

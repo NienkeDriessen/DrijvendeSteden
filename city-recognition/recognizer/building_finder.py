@@ -1,7 +1,5 @@
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
-from util import show_image
 from enum import Enum
 
 class ColorRange(Enum):

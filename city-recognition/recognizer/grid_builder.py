@@ -213,46 +213,12 @@ def approximate_coords(sub_anchor, anchor, new_coords, average_distance):
     if width_shift % 2 != 0:
         odd_or_even = True
         if distance_y < 0:
-            distance_y -= do
-        else:
             distance_y += do
+        else:
+            distance_y -= do
 
     height_shift = round(distance_y / dh)
-    new_coords = (250 - height_shift, 250 + width_shift)
+    new_coords = (250 + height_shift, 250 + width_shift)
 
     return new_coords, odd_or_even
-
-
-
-
-# Temporary code to draw the hexagon:
-def draw_hexagon(ax, center, size):
-    angles = np.linspace(0, 2*np.pi, 7)
-    x = center[0] + size * np.cos(angles)
-    y = center[1] + size * np.sin(angles)
-    ax.fill(x, y, edgecolor='black', linewidth=1, facecolor='lightgray')
-
-# def draw_grid(grid, hex_size = 1.0):
-#     fig, ax = plt.subplots()
-#     ax.set_aspect('equal')
-#     ax.set_axis_off()
-#     for row in range(50):
-#         for col in range(50):
-#             if (row, col) in grid.keys():
-#                 x = col * 3/2 * hex_size
-#                 y = row * np.sqrt(3) * hex_size
-#                 if col % 2 != 0:
-#                     y += np.sqrt(3) / 2 * hex_size
-#                 draw_hexagon(ax, (x, y), hex_size)
-#                 # text = grid[(row, col)]
-#                 text = (row, col)
-#                 ax.text(x, y, text, ha='center', va='center', color='black')
-
-            
-#     plt.show()
-
-
-def parse_grid_to_json(final_grid):
-    stringified_keys = {str(key) : value for key, value in final_grid.items()}
-    grid_json = json.dumps(stringified_keys)
-    return grid_json
+ 

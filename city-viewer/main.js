@@ -35,7 +35,7 @@ async function init() {
         controls.screenSpacePanning = false;
         controls.minDistance = 20;
         controls.maxDistance = 120;
-        // controls.maxPolarAngle = (Math.PI / 2) - 0.2;
+        controls.maxPolarAngle = (Math.PI / 2) - 0.2;
         
         return controls
     }

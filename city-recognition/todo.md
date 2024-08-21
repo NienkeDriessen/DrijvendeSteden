@@ -10,16 +10,13 @@
 - Color_recognizer moet getest worden voor verschillende foto's
 
 # City viewer
-- Er moet nog een goede manier gevonden om de gebouwen in te lezen
-    - Voor performance is het belangrijk dat elk verschillend gebouw maximaal 1 keer wordt ingelezen
-    - Ideaal gezien is het niet een reeks van nested functies
-    - Op dit moment wordt er overigens ook maar 1 gebouw ingelezen
-- Het visuele gedeelte kan nog verbeterd worden, juiste kleuren/groote van gebouwen vinden etc
+Zo goed als af.
 
 # Deployment - Dit werkt voor nu
-- City recognition draait nu met een flask front-end in PythonAnywhere
-- De stad definities worden opgeslagen in Google Firebase (Realtime Database)
-- De city viewer runt op een simpele static website host (Netlify)
+Zo goed als af - Deploy op ScienceCentre accounts
+- City recognition (PythonAnywhere)
+- Storage (Google Firebase - Realtime Database)
+- City viewer (Netlify)
 
 ### Misschien:
 # City Editor

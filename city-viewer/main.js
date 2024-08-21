@@ -34,7 +34,7 @@ async function init() {
         controls.dampingFactor = 0.25;
         controls.screenSpacePanning = false;
         controls.minDistance = 20;
-        controls.maxDistance = 120;
+        controls.maxDistance = 160;
         controls.maxPolarAngle = (Math.PI / 2) - 0.2;
         
         return controls

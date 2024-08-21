@@ -1,14 +1,18 @@
 from flask import Flask, request, render_template, redirect
 from recognizer.recognizer import recognize_city
-from firebase import firebase
+import firebase_admin
+from firebase_admin import credentials, db
 import os
 import qrcode
-from io import BytesIO
 
 app = Flask(__name__)
 
 app.config["IMAGE_UPLOAD"] = "upload/img.png"
-firebase = firebase.FirebaseApplication('https://drijvendesteden-default-rtdb.europe-west1.firebasedatabase.app/', None)
+
+cred = credentials.Certificate('/home/mart13/keys/key.json')
+firebase_admin.initialize_app(cred, {
+    'databaseURL': 'https://drijvendesteden-default-rtdb.europe-west1.firebasedatabase.app/'
+})
 
 @app.route("/", methods=["GET", "POST"])
 def upload_image():
@@ -19,7 +23,6 @@ def upload_image():
             return create_link(id)
     return render_template("upload_image.html")
 
-
 def create_result(image):
     if not os.path.exists("upload"):
         os.makedirs("upload")
@@ -28,8 +31,10 @@ def create_result(image):
 
     grid = recognize_city(app.config["IMAGE_UPLOAD"])
 
-    result = firebase.post('/data', grid)
-    return result['name']
+    ref = db.reference('/data')
+    new_data_ref = ref.push(grid)
+
+    return new_data_ref.key
 
 def create_link(id):
     link = f"https://singular-granita-604f65.netlify.app//?id={id}"

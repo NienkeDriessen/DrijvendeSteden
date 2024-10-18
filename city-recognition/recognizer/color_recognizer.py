@@ -2,6 +2,9 @@ import cv2
 import numpy as np
 from .util import Color
 
+# A very naive way of finding the color of the building. 
+# It computes the vector distance to the each of the RGB values of all the used colors 
+# (Colors are defined in util.py)
 def closest_color_name(color):
     closest_name = None
     min_dist = float('inf')
@@ -14,6 +17,7 @@ def closest_color_name(color):
             
     return closest_name
 
+# KNN: (k=1)
 def initialize_centroids(pixels, k):
     return pixels[np.random.choice(pixels.shape[0], k, replace=False)]
 

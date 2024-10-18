@@ -1,7 +1,6 @@
 import math
 from collections import Counter
 import numpy as np
-import json
 
 def build_grid(recognized_buildings):
     coordinates = recognized_buildings.keys()
@@ -22,11 +21,15 @@ def build_grid(recognized_buildings):
     new_coords = rotate_points_around_anchor(coordinates, anchor, angle)
 
     # Recursively create a grid starting at the anchor
+    # The virtual coords are chosen in a way that we cannot get negative coordinates, they are later normalized
     virtual_coords = {anchor : (250, 250)}
     visited = [anchor]
+    # Odd or even alternates per column of hexagon. This is because the x coordinate of certain neighbours (NW, NE, SW and SE) differs depending on the row.
     odd_or_even = {anchor : False}
     virtual_coords = create_hexagon_grid(anchor, new_coords, adjacent_hexagon, virtual_coords, visited, odd_or_even)
 
+    # Although in theory there shouldn't be any disconnected parts, it can still happen that some hexagon are missed.
+    # In case there are disconnected parts that are not found by the initial recursive pass, we try to approximate their location.
     while len(visited) < len(coordinates):
         unvisited = coordinates - visited
         sub_anchor = next(iter(unvisited))
@@ -123,7 +126,9 @@ def update_coords(recognized_buildings, grid):
 
     return final_grid
 
-
+# Adjacent hexagon are found based on the distance between the coordinates.
+# We first look at the smallest distance between any coordinates and then determine neighbours based on this distance.
+# The filter_threshold determines how much the distance is allowed to be different as opposed to the smallest distance
 def find_adjacent_hexagon(coordinates, filter_threshold = 0.6):
     smallest_distance = math.inf
     distances = {}
@@ -164,6 +169,11 @@ def find_neighbours(adjacent_hexagon, hex):
 def calculate_distance(coord1, coord2):
     return math.sqrt(pow((coord1[0] - coord2[0]), 2) + pow((coord1[1] - coord2[1]), 2))
 
+# Many functions that are used to rotate the image to make the recognition algorithm possible
+# I think this approach brings some difficulties with it, especially because a small error can
+# lead to much bigger errors on further hexagon.
+#
+# It is maybe better to scrap this and make sure that all pictures are correctly rotated before submitting it.
 def rotate_point(coord, angle):
     x, y = coord
     rotated_x = x * np.cos(-angle) - y * np.sin(-angle)
@@ -198,6 +208,7 @@ def find_rotation_angle(anchor, neighbours):
 
     return min_angle
 
+# Approximation function for disconnected parts.
 def approximate_coords(sub_anchor, anchor, new_coords, average_distance):
     odd_or_even = False
     coords_a = new_coords[anchor]

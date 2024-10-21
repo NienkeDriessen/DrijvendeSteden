@@ -15,3 +15,8 @@ npm install
 ```
 npx vite
 ```
+
+### Build for production
+```
+npx vite build
+```

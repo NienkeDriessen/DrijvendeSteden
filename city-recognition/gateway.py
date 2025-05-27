@@ -9,10 +9,12 @@ app = Flask(__name__)
 
 app.config["IMAGE_UPLOAD"] = "upload/img.png"
 
-cred = credentials.Certificate('/home/mart13/keys/key.json')
+cred = credentials.Certificate('C:/Users/Public/Documents/keys/drijvendesteden-4d9a7-firebase-adminsdk-fbsvc-45e7b44612.json')
 firebase_admin.initialize_app(cred, {
-    'databaseURL': 'https://drijvendesteden-default-rtdb.europe-west1.firebasedatabase.app/'
+    'databaseURL': 'https://drijvendesteden-4d9a7-default-rtdb.europe-west1.firebasedatabase.app/'
 })
+# # Dummy Firebase setup
+# print("Firebase disabled for testing mode.")
 
 @app.route("/", methods=["GET", "POST"])
 def upload_image():

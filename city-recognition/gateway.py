@@ -1,20 +1,19 @@
 from flask import Flask, request, render_template, redirect
 from recognizer.recognizer import recognize_city
-import firebase_admin
-from firebase_admin import credentials, db
 import os
 import qrcode
+import csv
 
 app = Flask(__name__)
 
 app.config["IMAGE_UPLOAD"] = "upload/img.png"
+DATABASE_FILE = 'city_data.csv'
 
-cred = credentials.Certificate('C:/Users/Public/Documents/keys/drijvendesteden-4d9a7-firebase-adminsdk-fbsvc-45e7b44612.json')
-firebase_admin.initialize_app(cred, {
-    'databaseURL': 'https://drijvendesteden-4d9a7-default-rtdb.europe-west1.firebasedatabase.app/'
-})
-# # Dummy Firebase setup
-# print("Firebase disabled for testing mode.")
+# Initialize the database file with headers if it doesn't exist
+if not os.path.exists(DATABASE_FILE):
+    with open(DATABASE_FILE, 'w', newline='') as csvfile:
+        csv_writer = csv.writer(csvfile)
+        csv_writer.writerow(['id', 'grid_data'])  # Add headers
 
 @app.route("/", methods=["GET", "POST"])
 def upload_image():
@@ -33,10 +32,37 @@ def create_result(image):
 
     grid = recognize_city(app.config["IMAGE_UPLOAD"])
 
-    ref = db.reference('/data')
-    new_data_ref = ref.push(grid)
+    # Save the grid data to the local CSV file
+    id = save_to_csv(grid)
 
-    return new_data_ref.key
+    return id
+
+def save_to_csv(grid):
+    # Generate a unique ID (you can use a counter or UUID)
+    id = generate_unique_id()
+
+    with open(DATABASE_FILE, 'a', newline='') as csvfile:
+        csv_writer = csv.writer(csvfile)
+        csv_writer.writerow([id, str(grid)])  # Save the grid data as a string
+
+    return id
+
+def generate_unique_id():
+    # Simple counter-based ID generation (for demonstration purposes)
+    # In a real application, consider using UUIDs or a more robust method
+    if not os.path.exists('id_counter.txt'):
+        with open('id_counter.txt', 'w') as f:
+            f.write('0')
+
+    with open('id_counter.txt', 'r') as f:
+        count = int(f.read())
+
+    count += 1
+
+    with open('id_counter.txt', 'w') as f:
+        f.write(str(count))
+
+    return count
 
 def create_link(id):
     link = f"https://singular-granita-604f65.netlify.app//?id={id}"
@@ -53,4 +79,7 @@ def create_link(id):
     img.save(qr_path)
 
     return render_template('show_link.html', link=link, qr_path=qr_path)
-    
+
+
+if __name__ == '__main__':
+    app.run(debug=False)

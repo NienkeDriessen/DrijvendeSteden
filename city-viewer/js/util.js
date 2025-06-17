@@ -1,18 +1,46 @@
-import { initializeApp } from 'firebase/app';
-import { getDatabase, ref, get } from "firebase/database";
+import Papa from 'papaparse';
 
-const firebaseConfig = {
-    databaseURL: "https://drijvendesteden-4d9a7-default-rtdb.europe-west1.firebasedatabase.app/",
-};
-
-const app = initializeApp(firebaseConfig);
+async function loadCSVData() {
+    try {
+        const response = await fetch('city_data.csv');
+        const csvText = await response.text();
+        const result = Papa.parse(csvText, { header: true }); // Removed dynamicTyping
+        return result.data;
+    } catch (error) {
+        console.error('Error reading CSV file:', error);
+        return null;
+    }
+}
 
 export async function load_city_definition() {
-    
-    let data = await retrieveData()
+    const csvData = await loadCSVData();
+    if (!csvData) {
+        return { city_definition: {}, numCols: -1, numRows: -1 };
+    }
+
+    const urlHash = window.location.hash;
+    let id = urlHash ? urlHash.slice(1) : '1'; // Default to ID 1 if no hash
+
+    // Convert id to string
+    id = String(id);
+
     let city_definition = {};
     let numCols = -1;
     let numRows = -1;
+
+    // Find the correct row in the CSV data based on the ID
+    let gridDataRow = csvData.find(row => row.id === id);
+
+    if (!gridDataRow) {
+        console.warn(`No city data found for ID: ${id}`);
+        return { city_definition: {}, numCols: -1, numRows: -1 };
+    }
+
+    let gridDataString = gridDataRow.grid_data;
+
+    // Parse the grid data string into an object
+    const data = JSON.parse(gridDataString.replace(/'/g, "\""));
+
     for (let key in data) {
         const coords = parseCoords(key);
         if (coords[0] > numRows)
@@ -22,32 +50,21 @@ export async function load_city_definition() {
 
         city_definition[coords] = data[key];
     }
-    return { city_definition, numCols, numRows }
-}
-
-async function retrieveData() {
-    const queryString = window.location.search;
-    const urlParams = new URLSearchParams(queryString);
-    let id = urlParams.get('id')
-    if (id == null) {
-        id = 1
-    }
-
-    const database = getDatabase(app);
-    const dataRef = ref(database, 'data/' + id);
-
-    try {
-        const snapshot = await get(dataRef);
-        return snapshot.val();
-    } catch (error) {
-        console.error('Error retrieving data:', error);
-        return null;
-    }
-    
+    return { city_definition, numCols, numRows };
 }
 
 function parseCoords(key) {
     let parts = key.slice(1, -1).split(',');
     let coord = parts.map(part => parseInt(part.trim()));
     return coord;
+}
+
+export async function getCityIDs() {
+    const csvData = await loadCSVData();
+    if (!csvData) {
+        return [];
+    }
+
+    const ids = csvData.map(row => row.id);
+    return ids;
 }

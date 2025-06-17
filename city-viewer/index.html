@@ -1,13 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<title>Drijvende Stad</title>
-		<style>
-			body { margin: 0; }
-		</style>
-	</head>
-	<body>
-		<script type="module" src="main.js"></script>
-	</body>
+<html>
+<head>
+    <title>Drijvende Stad Viewer</title>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <select id="citySelector"></select>
+    <script type="module" src="main.js"></script>
+    <script>
+        // Function to set the city ID based on the URL hash
+        function setCityIdFromHash() {
+            const cityId = window.location.hash ? window.location.hash.slice(1) : '1';
+            document.getElementById('citySelector').value = cityId;
+        }
+
+        // Listen for hash changes
+        window.addEventListener('hashchange', setCityIdFromHash);
+
+        // Call setCityIdFromHash on initial load
+        setCityIdFromHash();
+    </script>
+</body>
 </html>

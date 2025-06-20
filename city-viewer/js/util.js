@@ -1,45 +1,38 @@
-import Papa from 'papaparse';
-
-async function loadCSVData() {
+async function loadCityData(cityId) {
     try {
-        const response = await fetch('city_data.csv');
-        const csvText = await response.text();
-        const result = Papa.parse(csvText, { header: true }); // Removed dynamicTyping
-        return result.data;
+        const response = await fetch(`http://127.0.0.1:5000/api/city/${cityId}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        return data;
     } catch (error) {
-        console.error('Error reading CSV file:', error);
+        console.error('Error loading city data:', error);
         return null;
     }
 }
 
 export async function load_city_definition() {
-    const csvData = await loadCSVData();
-    if (!csvData) {
-        return { city_definition: {}, numCols: -1, numRows: -1 };
-    }
-
     const urlHash = window.location.hash;
     let id = urlHash ? urlHash.slice(1) : '1'; // Default to ID 1 if no hash
 
+    // Remove any query parameters from the hash
+    id = id.split('?')[0];
+
     // Convert id to string
     id = String(id);
+
+    const cityData = await loadCityData(id);
+    if (!cityData || !cityData.grid_data) {
+        console.warn(`No city data found for ID: ${id}`);
+        return { city_definition: {}, numCols: -1, numRows: -1 };
+    }
 
     let city_definition = {};
     let numCols = -1;
     let numRows = -1;
 
-    // Find the correct row in the CSV data based on the ID
-    let gridDataRow = csvData.find(row => row.id === id);
-
-    if (!gridDataRow) {
-        console.warn(`No city data found for ID: ${id}`);
-        return { city_definition: {}, numCols: -1, numRows: -1 };
-    }
-
-    let gridDataString = gridDataRow.grid_data;
-
-    // Parse the grid data string into an object
-    const data = JSON.parse(gridDataString.replace(/'/g, "\""));
+    const data = cityData.grid_data;
 
     for (let key in data) {
         const coords = parseCoords(key);
@@ -60,11 +53,15 @@ function parseCoords(key) {
 }
 
 export async function getCityIDs() {
-    const csvData = await loadCSVData();
-    if (!csvData) {
+    try {
+        const response = await fetch('http://127.0.0.1:5000/api/ids');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const ids = await response.json();
+        return ids;
+    } catch (error) {
+        console.error('Error loading city IDs:', error);
         return [];
     }
-
-    const ids = csvData.map(row => row.id);
-    return ids;
 }

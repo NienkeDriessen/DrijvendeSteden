@@ -1,19 +1,28 @@
-from flask import Flask, request, render_template, redirect
+from flask import Flask, request, render_template, redirect, jsonify
+from flask_sqlalchemy import SQLAlchemy
 from recognizer.recognizer import recognize_city
 import os
 import qrcode
-import csv
+import json
 
 app = Flask(__name__)
 
 app.config["IMAGE_UPLOAD"] = "upload/img.png"
-DATABASE_FILE = 'city_data.csv'
 
-# Initialize the database file with headers if it doesn't exist
-if not os.path.exists(DATABASE_FILE):
-    with open(DATABASE_FILE, 'w', newline='') as csvfile:
-        csv_writer = csv.writer(csvfile)
-        csv_writer.writerow(['id', 'grid_data'])  # Add headers
+# SQLite database configuration
+DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'city_data.db'))
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_PATH}'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+
+# Database model
+class City(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    grid_data = db.Column(db.Text, nullable=False)
+
+# Create database and tables
+with app.app_context():
+    db.create_all()
 
 @app.route("/", methods=["GET", "POST"])
 def upload_image():
@@ -32,54 +41,65 @@ def create_result(image):
 
     grid = recognize_city(app.config["IMAGE_UPLOAD"])
 
-    # Save the grid data to the local CSV file
-    id = save_to_csv(grid)
+    # Save the grid data to the SQLite database
+    id = save_to_database(grid)
 
     return id
 
-def save_to_csv(grid):
-    # Generate a unique ID (you can use a counter or UUID)
-    id = generate_unique_id()
-
-    with open(DATABASE_FILE, 'a', newline='') as csvfile:
-        csv_writer = csv.writer(csvfile)
-        csv_writer.writerow([id, str(grid)])  # Save the grid data as a string
-
-    return id
-
-def generate_unique_id():
-    # Simple counter-based ID generation (for demonstration purposes)
-    # In a real application, consider using UUIDs or a more robust method
-    if not os.path.exists('id_counter.txt'):
-        with open('id_counter.txt', 'w') as f:
-            f.write('0')
-
-    with open('id_counter.txt', 'r') as f:
-        count = int(f.read())
-
-    count += 1
-
-    with open('id_counter.txt', 'w') as f:
-        f.write(str(count))
-
-    return count
+def save_to_database(grid):
+    # Create new city record
+    new_city = City(grid_data=str(grid))
+    db.session.add(new_city)
+    db.session.commit()
+    
+    return new_city.id
 
 def create_link(id):
-    link = f"https://singular-granita-604f65.netlify.app//?id={id}"
+    # Update link to point to local viewer
+    link = f"http://127.0.0.1:8000/#?id={id}"  # Assuming viewer runs on port 8000
 
     qr = qrcode.QRCode(version=3, box_size=20, border=10, error_correction=qrcode.constants.ERROR_CORRECT_H)
     qr.add_data(link)
     qr.make(fit=True)
     img = qr.make_image(fill_color="black", back_color="white")
 
-    qr_path = "static/qr_code.png"
-    if not os.path.exists("static"):
-        os.makedirs("static")
+    qr_path = "city-recognition/static/qr_code.png"
+    if not os.path.exists("city-recognition/static"):
+        os.makedirs("city-recognition/static")
 
     img.save(qr_path)
 
     return render_template('show_link.html', link=link, qr_path=qr_path)
 
+# API endpoints for the viewer app
+@app.route('/api/ids')
+def api_ids():
+    cities = City.query.order_by(City.id).all()
+    ids = [str(city.id) for city in cities]
+    return jsonify(ids)
+
+@app.route('/api/city/<int:city_id>')
+def api_city(city_id):
+    city = City.query.get_or_404(city_id)
+    # Parse the grid data string into a JSON object
+    try:
+        grid_data = json.loads(city.grid_data.replace("'", '"'))
+    except json.JSONDecodeError:
+        # Fallback if the data isn't properly formatted
+        grid_data = {}
+    
+    return jsonify({
+        'id': str(city.id),
+        'grid_data': grid_data
+    })
+
+# CORS headers for cross-origin requests
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(debug=True, port=5000)

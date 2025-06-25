@@ -1,11 +1,14 @@
-from flask import Flask, request, render_template, redirect, jsonify
+from flask import Flask, request, render_template, redirect, jsonify, flash
 from flask_sqlalchemy import SQLAlchemy
 from recognizer.recognizer import recognize_city
 import os
 import qrcode
 import json
+from datetime import datetime
 
-app = Flask(__name__)
+app = Flask(__name__)  # Specify the static folder
+
+app.config['SECRET_KEY'] = 'your_secret_key'  # Required for flash messages
 
 app.config["IMAGE_UPLOAD"] = "upload/img.png"
 
@@ -18,7 +21,9 @@ db = SQLAlchemy(app)
 # Database model
 class City(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True, nullable=False)
     grid_data = db.Column(db.Text, nullable=False)
+    upload_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
 # Create database and tables
 with app.app_context():
@@ -27,28 +32,44 @@ with app.app_context():
 @app.route("/", methods=["GET", "POST"])
 def upload_image():
     if request.method == "POST":
-        if request.files:
-            image = request.files["image"]
-            id = create_result(image)
-            return create_link(id)
+        image = request.files.get("image")
+        city_name = request.form.get("city_name")
+
+        if not image:
+            flash('No image uploaded!', 'error')
+            return render_template("upload_image.html")
+
+        if not city_name:
+            flash('City name is required!', 'error')
+            return render_template("upload_image.html")
+
+        # Check for duplicate city name
+        existing_city = City.query.filter_by(name=city_name).first()
+        if existing_city:
+            flash('City name already exists. Please choose a different name.', 'error')
+            return render_template("upload_image.html")
+
+        id = create_result(image, city_name)
+        return create_link(id)
+
     return render_template("upload_image.html")
 
-def create_result(image):
+def create_result(image, city_name):
     if not os.path.exists("upload"):
         os.makedirs("upload")
 
-    image.save(app.config["IMAGE_UPLOAD"])
+    image.save(os.path.join("upload", "img.png"))  # Save with a fixed name
 
-    grid = recognize_city(app.config["IMAGE_UPLOAD"])
+    grid = recognize_city("upload/img.png")
 
     # Save the grid data to the SQLite database
-    id = save_to_database(grid)
+    id = save_to_database(grid, city_name)
 
     return id
 
-def save_to_database(grid):
+def save_to_database(grid, city_name):
     # Create new city record
-    new_city = City(grid_data=str(grid))
+    new_city = City(name=city_name, grid_data=str(grid))
     db.session.add(new_city)
     db.session.commit()
     
@@ -63,9 +84,9 @@ def create_link(id):
     qr.make(fit=True)
     img = qr.make_image(fill_color="black", back_color="white")
 
-    qr_path = "city-recognition/static/qr_code.png"
-    if not os.path.exists("city-recognition/static"):
-        os.makedirs("city-recognition/static")
+    qr_path = "static/qr_code.png"
+    if not os.path.exists("static"):
+        os.makedirs("static")
 
     img.save(qr_path)
 
@@ -90,7 +111,9 @@ def api_city(city_id):
     
     return jsonify({
         'id': str(city.id),
-        'grid_data': grid_data
+        'name': city.name,
+        'grid_data': grid_data,
+        'upload_date': city.upload_date.isoformat()
     })
 
 # CORS headers for cross-origin requests

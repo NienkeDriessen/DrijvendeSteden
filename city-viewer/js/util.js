@@ -58,8 +58,8 @@ export async function getCityIDs() {
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const ids = await response.json();
-        return ids;
+        const cities = await response.json();  // now an array of {id, name, upload_date}
+        return cities;
     } catch (error) {
         console.error('Error loading city IDs:', error);
         return [];

@@ -73,28 +73,27 @@ async function init() {
 }
 
 async function populateCitySelector() {
-    const cityIDs = await getCityIDs();
+    const cities = await getCityIDs();
     const citySelector = document.getElementById('citySelector');
 
-    cityIDs.forEach(id => {
+    cities.forEach(city => {
         const option = document.createElement('option');
-        option.value = id;
-        option.textContent = `City ID: ${id}`;
+        option.value = city.id;
+        // format upload_date to a more human‐readable form if you like
+        const date = new Date(city.upload_date).toLocaleDateString();
+        option.textContent = `City ${city.id}, "${city.name}". Upload date: ${date}`;
         citySelector.appendChild(option);
     });
 
     citySelector.addEventListener('change', () => {
         window.location.hash = citySelector.value;
-        // Reload the scene when a new city is selected
         location.reload();
     });
 
-    // Set initial city ID from URL hash
     if (window.location.hash) {
         citySelector.value = window.location.hash.slice(1);
     }
 
-    // Initialize the scene after populating the selector
     await init();
 }
 

@@ -96,8 +96,15 @@ def create_link(id):
 @app.route('/api/ids')
 def api_ids():
     cities = City.query.order_by(City.id).all()
-    ids = [str(city.id) for city in cities]
-    return jsonify(ids)
+    data = [
+        {
+            'id': city.id,
+            'name': city.name,
+            'upload_date': city.upload_date.isoformat()
+        }
+        for city in cities
+    ]
+    return jsonify(data)
 
 @app.route('/api/city/<int:city_id>')
 def api_city(city_id):

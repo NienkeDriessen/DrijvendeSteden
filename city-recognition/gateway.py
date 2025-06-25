@@ -1,14 +1,15 @@
-from flask import Flask, request, render_template, redirect, jsonify, flash
+from flask import Flask, request, render_template, redirect, jsonify, flash, Response
 from flask_sqlalchemy import SQLAlchemy
 from recognizer.recognizer import recognize_city
 import os
 import qrcode
 import json
 from datetime import datetime
+from functools import wraps
 
 app = Flask(__name__)  # Specify the static folder
 
-app.config['SECRET_KEY'] = 'your_secret_key'  # Required for flash messages
+# app.config['SECRET_KEY'] = 'your_secret_key'  # Required for flash messages
 
 app.config["IMAGE_UPLOAD"] = "upload/img.png"
 
@@ -92,8 +93,31 @@ def create_link(id):
 
     return render_template('show_link.html', link=link, qr_path=qr_path)
 
+# Basic-Auth credentials via env-vars
+API_USER = os.getenv('API_USER', 'admin')
+API_PASS = os.getenv('API_PASS', 'secret')
+
+def check_auth(username, password):
+    return username == API_USER and password == API_PASS
+
+def authenticate():
+    return Response(
+        '\n Authentication required!', 401,
+        {'WWW-Authenticate': 'Basic realm="Login Required"'
+    })
+
+def requires_auth(f):
+    @wraps(f)
+    def wrapped(*args, **kwargs):
+        auth = request.authorization
+        if not auth or not check_auth(auth.username, auth.password):
+            return authenticate()
+        return f(*args, **kwargs)
+    return wrapped
+
 # API endpoints for the viewer app
 @app.route('/api/ids')
+@requires_auth
 def api_ids():
     cities = City.query.order_by(City.id).all()
     data = [
@@ -107,6 +131,7 @@ def api_ids():
     return jsonify(data)
 
 @app.route('/api/city/<int:city_id>')
+@requires_auth
 def api_city(city_id):
     city = City.query.get_or_404(city_id)
     # Parse the grid data string into a JSON object
@@ -132,4 +157,8 @@ def after_request(response):
     return response
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    # bind to 0.0.0.0 so other machines can curl in
+    app.run(host='0.0.0.0', port=5000, debug=True)
+
+    # From another machine just run:
+    # curl -u youruser:yourpass http://SERVER_IP:5000/api/ids

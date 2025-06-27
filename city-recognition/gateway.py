@@ -133,7 +133,9 @@ def api_ids():
         {
             'id': city.id,
             'name': city.name,
-            'upload_date': city.upload_date.isoformat()
+            'grid_data': city.grid_data.replace("'", '"'),
+            'upload_date': city.upload_date.isoformat(),
+
         }
         for city in cities
     ]
@@ -145,7 +147,7 @@ def api_city(city_id):
     city = City.query.get_or_404(city_id)
     # Parse the grid data string into a JSON object
     try:
-        grid_data = json.loads(city.grid_data.replace("'", '"'))
+        grid_data = json.loads(city.grid_data)
     except json.JSONDecodeError:
         # Fallback if the data isn't properly formatted
         grid_data = {}

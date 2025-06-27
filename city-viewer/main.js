@@ -4,28 +4,31 @@ import { createOcean } from './js/ocean';
 import { createSky } from './js/sky';
 import { createSun } from './js/sun';
 import { createCity } from './js/city';
+import { getCityIDs } from './js/util';
+
+let scene, camera, renderer, controls, water, sky, city; // Declare variables
 
 async function init() {
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 1000 );
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 1000 );
 
-    const renderer = new THREE.WebGLRenderer();
+    renderer = new THREE.WebGLRenderer();
     renderer.setSize( window.innerWidth, window.innerHeight );
     document.body.appendChild( renderer.domElement );
 
-    const controls = createControls()
+    controls = createControls()
     
     controls.target.set(40,0,40)
     camera.position.set(0, 120, 150);
 
 
     // Create environment
-    const water = createOcean(scene)
-    const sky = createSky(scene)
+    water = createOcean(scene)
+    sky = createSky(scene)
     createSun(scene, renderer, sky, water)
 
     // Create city
-    const city = await createCity(scene)
+    city = await createCity(scene)
 
     function createControls() {
         const controls = new OrbitControls(camera, renderer.domElement);
@@ -51,9 +54,15 @@ async function init() {
     }
 
     function animate() {
-        water.material.uniforms[ 'time' ].value += 1.0 / 180.0;
-        animateCity()
-        controls.update();
+        if (water && water.material && water.material.uniforms && water.material.uniforms['time']) {
+            water.material.uniforms['time'].value += 1.0 / 180.0;
+        }
+        if (city) {
+            animateCity()
+        }
+        if (controls) {
+            controls.update();
+        }
 
         requestAnimationFrame(animate);
         renderer.render(scene, camera);
@@ -65,4 +74,29 @@ async function init() {
     animate();
 }
 
-init()
+async function populateCitySelector() {
+    const cities = await getCityIDs();
+    const citySelector = document.getElementById('citySelector');
+
+    cities.forEach(city => {
+        const option = document.createElement('option');
+        option.value = city.id;
+        // format upload_date to a more human‐readable form if you like
+        const date = new Date(city.upload_date).toLocaleDateString();
+        option.textContent = `City ${city.id}, "${city.name}". Upload date: ${date}`;
+        citySelector.appendChild(option);
+    });
+
+    citySelector.addEventListener('change', () => {
+        window.location.hash = citySelector.value;
+        location.reload();
+    });
+
+    if (window.location.hash) {
+        citySelector.value = window.location.hash.slice(1);
+    }
+
+    await init();
+}
+
+populateCitySelector();

@@ -9,6 +9,7 @@
     <h1>Image has been processed</h1>
     <p>Here is your link: <a href="{{ link }}" target="_blank">{{ link }}</a></p>
     <h2>QR Code:</h2>
-    <img src="static/qr_code.png" alt="qr" style="width:256px;height:256px;">
+    <img src="{{ url_for('static', filename='qr_code.png') }}"
+         alt="qr" style="width:256px;height:256px;">
 </body>
-</html
+</html>

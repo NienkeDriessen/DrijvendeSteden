@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, jsonify, flash, Response
+from flask import Flask, request, render_template, redirect, jsonify, flash, Response, url_for
 from flask_sqlalchemy import SQLAlchemy
 from recognizer.recognizer import recognize_city
 import os
@@ -7,9 +7,10 @@ import json
 from datetime import datetime
 from functools import wraps
 
-app = Flask(__name__)  # Specify the static folder
+app = Flask(__name__)
 
-# app.config['SECRET_KEY'] = 'your_secret_key'  # Required for flash messages
+# 1) enable sessions/flashing
+app.secret_key = os.getenv('SECRET_KEY', 'change-this-to-a-random-value')
 
 app.config["IMAGE_UPLOAD"] = "upload/img.png"
 
@@ -50,10 +51,18 @@ def upload_image():
             flash('City name already exists. Please choose a different name.', 'error')
             return render_template("upload_image.html")
 
+        # Save & get new ID
         id = create_result(image, city_name)
-        return create_link(id)
+
+        # 2) PRG: redirect to a GET route instead of rendering directly
+        return redirect(url_for('show_link', city_id=id))
 
     return render_template("upload_image.html")
+
+# 3) new GET‐only endpoint to display the link/QR
+@app.route("/link/<int:city_id>")
+def show_link(city_id):
+    return create_link(city_id)
 
 def create_result(image, city_name):
     if not os.path.exists("upload"):
@@ -85,13 +94,13 @@ def create_link(id):
     qr.make(fit=True)
     img = qr.make_image(fill_color="black", back_color="white")
 
-    qr_path = "static/qr_code.png"
-    if not os.path.exists("static"):
-        os.makedirs("static")
+    qr_path = "city-recognition/static/qr_code.png"
+    if not os.path.exists("city-recognition/static"):
+        os.makedirs("city-recognition/static")
 
     img.save(qr_path)
 
-    return render_template('show_link.html', link=link, qr_path=qr_path)
+    return render_template('show_link.html', link=link)
 
 # Basic-Auth credentials via env-vars
 API_USER = os.getenv('API_USER', 'admin')

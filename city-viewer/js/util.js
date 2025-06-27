@@ -1,6 +1,13 @@
+// ← add your API_USER/API_PASS here (or import from a config module)
+const API_USER = 'admin';
+const API_PASS = 'secret';
+const AUTH_HEADER = 'Basic ' + btoa(`${API_USER}:${API_PASS}`);
+
 async function loadCityData(cityId) {
     try {
-        const response = await fetch(`http://127.0.0.1:5000/api/city/${cityId}`);
+        const response = await fetch(`http://127.0.0.1:5000/api/city/${cityId}`, {
+            headers: { 'Authorization': AUTH_HEADER }
+        });
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -54,7 +61,9 @@ function parseCoords(key) {
 
 export async function getCityIDs() {
     try {
-        const response = await fetch('http://127.0.0.1:5000/api/ids');
+        const response = await fetch('http://127.0.0.1:5000/api/ids', {
+            headers: { 'Authorization': AUTH_HEADER }
+        });
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }

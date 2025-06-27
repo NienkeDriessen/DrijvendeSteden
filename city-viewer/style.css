@@ -1,0 +1,152 @@
+body {
+  margin: 0;
+  overflow: hidden;
+  font-family: sans-serif;
+}
+
+@font-face {
+  font-family: 'TitleFont';
+  src: url("public\assets\fonnts.com-Alkaline_Caps_Heavy (1).otf") format('truetype');
+}
+
+#menuButton {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #e1f1ff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  cursor: pointer;
+  z-index: 10;
+  font-weight: bold;
+  color: #0a1c2b;
+}
+
+#menuIcon {
+  width: 10%;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+}
+
+#menuOverlay {
+  position: fixed;
+  bottom: -100%;
+  left: 0;
+  width: 100%;
+  height: 80%;
+  background: #e1f1ff;
+  transition: bottom 0.5s ease-in-out;
+  z-index: 9;
+  display: flex;
+  flex-direction: column;
+  
+}
+
+#menuOverlay.active {
+  bottom: 0;
+}
+
+.wave {
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+  transform: scaleY(-1) translateY(99px);
+  fill: #e1f1ff;
+}
+
+.wave svg {
+  position: relative;
+  display: block;
+  width: calc(200% - 1px);
+  height: 100px;
+  animation: waveMove 1s ease-in-out infinite;
+  animation-direction: alternate;
+}
+
+@keyframes waveMove {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.menuContent {
+  height: 20%;
+  display: flex;
+  justify-content: center;
+  /* flex-direction: column; */
+  color: #0c2340;
+}
+
+.title {
+  font-weight: bold;
+  font-family: 'TitleFont', sans-serif;
+  color: #0c2340;
+  font-size:50px;
+}
+
+
+.container {
+  display: grid;
+  grid-template-columns: auto auto auto auto;
+  padding: 5% 15% 5% 15%;
+  align-items: center;
+}
+.container > div {
+  background-color: #0C2340;
+  color: #F7ECD8;
+  padding: 5%;
+  font-size: 30px;
+  text-align: center;
+  margin: 2%;
+  font-size: 10px;
+}
+
+.link_button {
+  height: 40%;
+}
+
+
+
+/* Landscape phones and tablets */
+@media only screen and (min-width: 600px) and (max-width: 991px) {
+  #menuIcon {
+    width: 6%;
+  }
+}
+/* Portrait phones */
+@media only screen and (orientation: portrait) {
+  #menuIcon {
+    width: 15%;
+  }
+  .title {
+    font-size:100px;
+  }
+
+  .link_button {
+    height: 100px;
+  }
+
+  .container {
+    grid-template-columns: auto auto;
+  }
+
+  .menuContent {
+    height: auto;
+  }
+
+}
+
+/* Desktops */
+@media only screen and (min-width: 992px) {
+  #menuIcon {
+    width: 4%;
+  }
+}
+
+/* Desktops */
+@media only screen and (min-width: 992px) and (orientation: portrait){
+  #menuIcon {
+    width: 8%;
+  }
+}

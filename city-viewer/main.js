@@ -13,7 +13,6 @@ async function init() {
     renderer.setSize( window.innerWidth, window.innerHeight );
     document.body.appendChild( renderer.domElement );
 
-
     const controls = createControls()
     
     controls.target.set(40,0,40)
@@ -59,6 +58,9 @@ async function init() {
         requestAnimationFrame(animate);
         renderer.render(scene, camera);
     }
+    document.getElementById('menuIcon').addEventListener('click', () => {
+        document.getElementById('menuOverlay').classList.toggle('active');
+    });
 
     animate();
 }

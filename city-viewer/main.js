@@ -6,104 +6,63 @@ import { createSun } from './js/sun';
 import { createCity } from './js/city';
 import { getCityIDs } from './js/util';
 
-let scene, camera, renderer, controls, water, sky, city; // Declare variables
+let scene, camera, renderer, controls, water, sky, city;
 
-async function init() {
-    scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 1000 );
-
-    renderer = new THREE.WebGLRenderer();
-    renderer.setSize( window.innerWidth, window.innerHeight );
-    document.body.appendChild( renderer.domElement );
-
-    controls = createControls()
-    
-    controls.target.set(40,0,40)
-    camera.position.set(0, 120, 150);
-
-
-    // Create environment
-    water = createOcean(scene)
-    sky = createSky(scene)
-    createSun(scene, renderer, sky, water)
-
-    // Create city
-    city = await createCity(scene)
-
-    function createControls() {
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.25;
-        controls.screenSpacePanning = false;
-        controls.minDistance = 20;
-        controls.maxDistance = 160;
-        controls.maxPolarAngle = (Math.PI / 2) - 0.2;
-        
-        return controls
-    }
-
-    window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-
-    function animateCity() {
-        const time = performance.now() * 0.001;
-        city.position.y = Math.sin( time ) * 0.3;
-    }
-
-    function animate() {
-        if (water && water.material && water.material.uniforms && water.material.uniforms['time']) {
-            water.material.uniforms['time'].value += 1.0 / 180.0;
-        }
-        if (city) {
-            animateCity()
-        }
-        if (controls) {
-            controls.update();
-        }
-
-        requestAnimationFrame(animate);
-        renderer.render(scene, camera);
-    }
-    document.getElementById('menuIcon').addEventListener('click', () => {
-        document.getElementById('menuOverlay').classList.toggle('active');
-    });
-
-    animate();
+function getCurrentCityId() {
+  return window.location.hash ? window.location.hash.slice(1) : '1';
 }
 
-async function populateMenuButtons() {
-    const cities = await getCityIDs();
-    const container = document.querySelector('.container');
+function setCityTitle(cityId, cities) {
+  const city = cities.find(c => c.id === cityId);
+  const titleEl = document.getElementById('cityNameTitle');
+  titleEl.textContent = city ? city.name : 'Unknown City';
+}
 
-    container.innerHTML = ''; // Clear hardcoded buttons
+async function initScene() {
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
+  renderer = new THREE.WebGLRenderer();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
 
-    cities.forEach((city, index) => {
-        const button = document.createElement('div');
-        button.className = 'link_button';
-        button.id = city.id;
-        const date = new Date(city.upload_date).toLocaleDateString();
-        button.textContent = `City ${city.id}: "${city.name}" (${date})`;
+  controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.25;
+  controls.minDistance = 20;
+  controls.maxDistance = 160;
+  controls.maxPolarAngle = Math.PI / 2 - 0.2;
+  controls.target.set(40, 0, 40);
+  camera.position.set(0, 120, 150);
 
-        const newButton = createCityButton(city,index )
+  water = createOcean(scene);
+  sky = createSky(scene);
+  createSun(scene, renderer, sky, water);
+  city = await createCity(scene);
 
-        newButton.addEventListener('click', () => {
-            window.location.hash = city.id;
-            location.reload();
-        });
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
 
-        container.appendChild(newButton);
-    });
+  animate();
+}
 
-    await init();
+function animate() {
+  requestAnimationFrame(animate);
+  if (water?.material?.uniforms?.time) {
+    water.material.uniforms.time.value += 1 / 180;
+  }
+  if (city) {
+    city.position.y = Math.sin(performance.now() * 0.001) * 0.3;
+  }
+  controls.update();
+  renderer.render(scene, camera);
 }
 
 function createCityButton(city, index) {
   const button = document.createElement('div');
   button.className = 'city_button';
-
   button.innerHTML = `
     <div class="city_layout">
       <div class="city_number">${index + 1}</div>
@@ -113,12 +72,40 @@ function createCityButton(city, index) {
       </div>
     </div>
   `;
-
   button.onclick = () => {
     window.location.hash = `#${city.id}`;
-    // optionally close menuOverlay here
+    updateUI(); // instead of reload
   };
-
   return button;
 }
-populateMenuButtons();
+
+async function populateMenuButtons(cities) {
+  const container = document.querySelector('.container');
+  container.innerHTML = '';
+  cities.forEach((city, index) => {
+    const btn = createCityButton(city, index);
+    container.appendChild(btn);
+  });
+}
+
+function setupMenuToggle() {
+  document.getElementById('menuIcon').addEventListener('click', () => {
+    document.getElementById('menuOverlay').classList.toggle('active');
+  });
+}
+
+async function updateUI() {
+  const cities = await getCityIDs();
+  const currentId = getCurrentCityId();
+  setCityTitle(currentId, cities);
+  populateMenuButtons(cities);
+}
+
+async function main() {
+  setupMenuToggle();
+  await updateUI();
+  await initScene();
+  window.addEventListener('hashchange', updateUI);
+}
+
+main();

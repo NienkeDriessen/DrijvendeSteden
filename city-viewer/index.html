@@ -4,6 +4,7 @@
 <body>
     <!-- <select id="citySelector"></select> -->
   <!-- <button id="menuButton" src="public\assets\Menu.svg">Menu</button> -->
+  <h2 id="cityNameTitle"></h2>
   <img src="public\assets\Menu.svg" id="menuIcon" onclick="">
   <div id="menuOverlay">
     <!-- <div class="wave">
@@ -23,17 +24,5 @@
   </div>
 
   <script type="module" src="main.js"></script>
-  <script>
-        // Function to set the city ID based on the URL hash
-        function setCityIdFromHash() {
-            const cityId = window.location.hash ? window.location.hash.slice(1) : '1';
-            document.getElementById('citySelector').value = cityId;
-        }
 
-        // Listen for hash changes
-        window.addEventListener('hashchange', setCityIdFromHash);
-
-        // Call setCityIdFromHash on initial load
-        setCityIdFromHash();
-    </script>
 </body>

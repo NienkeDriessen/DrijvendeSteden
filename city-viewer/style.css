@@ -70,6 +70,16 @@ body {
   100% { transform: translateX(-50%); }
 }
 
+#cityNameTitle {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  font-weight: 100;
+  font-family: 'TitleFont', sans-serif;
+  color: #0c2340;
+  font-size:50px;
+}
+
 .menuContent {
   height: 20%;
   display: flex;
@@ -191,6 +201,14 @@ body {
 
   .menuContent {
     height: auto;
+  }
+
+  
+  #cityNameTitle {
+    font-size:4rem;
+    left: 10%;
+    top: 3%;
+    margin: 0;
   }
 
 

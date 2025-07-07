@@ -13,9 +13,10 @@ function getCurrentCityId() {
 }
 
 function setCityTitle(cityId, cities) {
+  console.log("CITY LIST = ", cities)
   const city = cities.find(c => c.id === cityId);
   const titleEl = document.getElementById('cityNameTitle');
-  titleEl.textContent = city ? city.name : 'Unknown City';
+  titleEl.textContent = cities[cityId].name;
 }
 
 async function initScene() {
@@ -73,7 +74,7 @@ function createCityButton(city, index) {
     </div>
   `;
   button.onclick = () => {
-    window.location.hash = `#${city.id}`;
+    window.location.hash = `#${city.id -1}`;
     updateUI(); // instead of reload
   };
   return button;

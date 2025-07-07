@@ -32,7 +32,6 @@ export async function load_city_definition() {
     id = String(id);
 
     const cityData = await loadCityData(id);
-    if( !cityData) console.warn("no citydata");
     if (!cityData || !cityData.grid_data) {
         console.warn(`No city data found for ID: ${id}`);
         return { city_definition: {}, numCols: -1, numRows: -1 };
@@ -65,8 +64,6 @@ function parseCoords(key) {
 
 export async function getCityIDs() {
     try {
-        
-
         const response = await fetch(`${API_HOST}/api/ids`, {
         headers: { 'Authorization': AUTH_HEADER }
         });

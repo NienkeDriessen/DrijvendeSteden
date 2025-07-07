@@ -167,7 +167,7 @@ def after_request(response):
 
 if __name__ == '__main__':
     # bind to 0.0.0.0 so other machines can curl in
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5050, debug=True)
 
     # From another machine just run:
     # curl -u youruser:yourpass http://SERVER_IP:5000/api/ids

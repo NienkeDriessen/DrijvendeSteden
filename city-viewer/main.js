@@ -80,21 +80,45 @@ async function populateMenuButtons() {
 
     container.innerHTML = ''; // Clear hardcoded buttons
 
-    cities.forEach(city => {
+    cities.forEach((city, index) => {
         const button = document.createElement('div');
         button.className = 'link_button';
         button.id = city.id;
         const date = new Date(city.upload_date).toLocaleDateString();
         button.textContent = `City ${city.id}: "${city.name}" (${date})`;
 
-        button.addEventListener('click', () => {
+        const newButton = createCityButton(city,index )
+
+        newButton.addEventListener('click', () => {
             window.location.hash = city.id;
             location.reload();
         });
 
-        container.appendChild(button);
+        container.appendChild(newButton);
     });
 
     await init();
+}
+
+function createCityButton(city, index) {
+  const button = document.createElement('div');
+  button.className = 'city_button';
+
+  button.innerHTML = `
+    <div class="city_layout">
+      <div class="city_number">${index + 1}</div>
+      <div class="city_info">
+        <div class="city_name">${city.name}</div>
+        <div class="city_date">${new Date(city.upload_date).toLocaleDateString()}</div>
+      </div>
+    </div>
+  `;
+
+  button.onclick = () => {
+    window.location.hash = `#${city.id}`;
+    // optionally close menuOverlay here
+  };
+
+  return button;
 }
 populateMenuButtons();

@@ -2,6 +2,8 @@
 const API_USER = 'admin';
 const API_PASS = 'secret';
 const AUTH_HEADER = 'Basic ' + btoa(`${API_USER}:${API_PASS}`);
+const API_HOST = 'http://192.168.178.101:5050'; // ← IP of your laptop & port of Flask
+
 
 async function loadCityData(cityId) {
     try {
@@ -59,10 +61,13 @@ function parseCoords(key) {
     return coord;
 }
 
+
 export async function getCityIDs() {
     try {
-        const response = await fetch('http://127.0.0.1:5000/api/ids', {
-            headers: { 'Authorization': AUTH_HEADER }
+        
+
+        const response = await fetch(`${API_HOST}/api/ids`, {
+        headers: { 'Authorization': AUTH_HEADER }
         });
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);

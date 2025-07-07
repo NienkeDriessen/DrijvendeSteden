@@ -74,29 +74,27 @@ async function init() {
     animate();
 }
 
-async function populateCitySelector() {
+async function populateMenuButtons() {
     const cities = await getCityIDs();
-    const citySelector = document.getElementById('citySelector');
+    const container = document.querySelector('.container');
+
+    container.innerHTML = ''; // Clear hardcoded buttons
 
     cities.forEach(city => {
-        const option = document.createElement('option');
-        option.value = city.id;
-        // format upload_date to a more human‐readable form if you like
+        const button = document.createElement('div');
+        button.className = 'link_button';
+        button.id = city.id;
         const date = new Date(city.upload_date).toLocaleDateString();
-        option.textContent = `City ${city.id}, "${city.name}". Upload date: ${date}`;
-        citySelector.appendChild(option);
-    });
+        button.textContent = `City ${city.id}: "${city.name}" (${date})`;
 
-    citySelector.addEventListener('change', () => {
-        window.location.hash = citySelector.value;
-        location.reload();
-    });
+        button.addEventListener('click', () => {
+            window.location.hash = city.id;
+            location.reload();
+        });
 
-    if (window.location.hash) {
-        citySelector.value = window.location.hash.slice(1);
-    }
+        container.appendChild(button);
+    });
 
     await init();
 }
-
-populateCitySelector();
+populateMenuButtons();

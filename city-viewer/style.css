@@ -9,11 +9,11 @@ body {
   src: url("public\assets\fonnts.com-Alkaline_Caps_Heavy (1).otf") format('truetype');
 }
 
-#menuButton {
+/* #menuButton {
   position: fixed;
   top: 20px;
   right: 20px;
-  background: #e1f1ff;
+  /* background: #e1f1ff; 
   border: none;
   border-radius: 8px;
   padding: 10px 16px;
@@ -21,7 +21,7 @@ body {
   z-index: 10;
   font-weight: bold;
   color: #0a1c2b;
-}
+} */
 
 #menuIcon {
   width: 10%;
@@ -36,7 +36,7 @@ body {
   left: 0;
   width: 100%;
   height: 80%;
-  background: #e1f1ff;
+  /* background:rgba(86, 184, 249, 0.2);; */
   transition: bottom 0.5s ease-in-out;
   z-index: 9;
   display: flex;
@@ -119,8 +119,8 @@ body {
 
 
 .city_button {
-  background-color: white;
-  color: #0C2340;
+  background-color: #0C2340;
+  color: #E1F1FF;
   border-radius: 12px;
   padding: 26px 16px 26px 16px;
   margin: 10px;

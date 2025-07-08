@@ -11,8 +11,8 @@ export async function createCity(scene) {
     const vertical_distance = (hex_size + padding) * Math.sqrt(3);
     const vertical_offset = (hex_size + padding) * (Math.sqrt(3) / 2); 
 
-    const { city_definition, numRows, numCols } = await load_city_definition()
-
+    const { city_definition, numCols, numRows } = await load_city_definition()
+    console.log('🎯 createCity got:', city_definition, numCols, numRows);
     const city = new THREE.Group();
 
     const modelManager = new ModelManager();

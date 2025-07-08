@@ -6,6 +6,7 @@ import qrcode
 import json
 from datetime import datetime
 from functools import wraps
+import ast
 
 app = Flask(__name__)
 
@@ -71,18 +72,18 @@ def create_result(image, city_name):
     image.save(os.path.join("upload", "img.png"))  # Save with a fixed name
 
     grid = recognize_city("upload/img.png")
-
+    print(grid)
     # Save the grid data to the SQLite database
     id = save_to_database(grid, city_name)
 
     return id
 
 def save_to_database(grid, city_name):
-    # Create new city record
-    new_city = City(name=city_name, grid_data=str(grid))
+    # save a JSON string, not repr(grid)
+    payload = json.dumps(grid)
+    new_city = City(name=city_name, grid_data=payload)
     db.session.add(new_city)
     db.session.commit()
-    
     return new_city.id
 
 def create_link(id):
@@ -129,34 +130,35 @@ def requires_auth(f):
 @requires_auth
 def api_ids():
     cities = City.query.order_by(City.id).all()
-    data = [
+    # only send id, name and upload_date
+    return jsonify([
         {
-            'id': city.id,
-            'name': city.name,
-            'grid_data': city.grid_data.replace("'", '"'),
-            'upload_date': city.upload_date.isoformat(),
-
+            'id': c.id,
+            'name': c.name,
+            'upload_date': c.upload_date.isoformat()
         }
-        for city in cities
-    ]
-    return jsonify(data)
+        for c in cities
+    ])
 
 @app.route('/api/city/<int:city_id>')
 @requires_auth
 def api_city(city_id):
     city = City.query.get_or_404(city_id)
-    # Parse the grid data string into a JSON object
+    # parse the grid_data string into a real JSON object
     try:
-        grid_data = json.loads(city.grid_data)
+        grid = json.loads(city.grid_data)
     except json.JSONDecodeError:
-        # Fallback if the data isn't properly formatted
-        grid_data = {}
-    
+        # If JSON decoding fails, attempt to parse as a Python literal
+        try:
+            grid = ast.literal_eval(city.grid_data)
+        except (SyntaxError, ValueError):
+            # If literal evaluation fails as well, return an empty dictionary
+            grid = {}
     return jsonify({
-        'id': str(city.id),
+        'id': city.id,
         'name': city.name,
-        'grid_data': grid_data,
-        'upload_date': city.upload_date.isoformat()
+        'upload_date': city.upload_date.isoformat(),
+        'grid_data': grid
     })
 
 # CORS headers for cross-origin requests

@@ -1,35 +1,38 @@
 // ← add your API_USER/API_PASS here (or import from a config module)
 const API_USER = 'admin';
 const API_PASS = 'secret';
+const API_BASE = 'http://127.0.0.1:5000';
 const AUTH_HEADER = 'Basic ' + btoa(`${API_USER}:${API_PASS}`);
 
 async function loadCityData(cityId) {
-    try {
-        const response = await fetch(`http://127.0.0.1:5000/api/city/${cityId}`, {
-            headers: { 'Authorization': AUTH_HEADER }
-        });
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('Error loading city data:', error);
-        return null;
-    }
+    console.log(`→ fetching city ${cityId} from ${API_BASE}/api/city/${cityId}`);
+    const res = await fetch(`${API_BASE}/api/city/${cityId}`, {
+        headers: { 'Authorization': AUTH_HEADER }
+    });
+    console.log('← status', res.status);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const body = await res.json();
+    console.log('← payload', body);
+    return body;
 }
 
 export async function load_city_definition() {
-    const urlHash = window.location.hash;
-    let id = urlHash ? urlHash.slice(1) : '1'; // Default to ID 1 if no hash
+    // normalize the hash into a pure numeric ID
+    const raw = window.location.hash.slice(1); // e.g. "2" or "?id=2"
+    let id = '1';                               // default
 
-    // Remove any query parameters from the hash
-    id = id.split('?')[0];
-
-    // Convert id to string
-    id = String(id);
+    if (raw.startsWith('?')) {
+        // parse "?id=2"
+        const params = new URLSearchParams(raw.slice(1));
+        id = params.get('id') || id;
+    } else if (raw) {
+        // parse "2"
+        id = raw;
+    }
 
     const cityData = await loadCityData(id);
+    console.log('💾 raw cityData.grid_data:', cityData.grid_data);
+
     if (!cityData || !cityData.grid_data) {
         console.warn(`No city data found for ID: ${id}`);
         return { city_definition: {}, numCols: -1, numRows: -1 };
@@ -54,9 +57,12 @@ export async function load_city_definition() {
 }
 
 function parseCoords(key) {
-    let parts = key.slice(1, -1).split(',');
-    let coord = parts.map(part => parseInt(part.trim()));
-    return coord;
+    // strip parentheses if present
+    const raw = key.startsWith('(') && key.endsWith(')') 
+      ? key.slice(1, -1) 
+      : key;
+    const parts = raw.split(',');
+    return parts.map(p => parseInt(p.trim(), 10));
 }
 
 export async function getCityIDs() {

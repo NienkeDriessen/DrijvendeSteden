@@ -135,7 +135,8 @@ def api_ids():
         {
             'id': c.id,
             'name': c.name,
-            'upload_date': c.upload_date.isoformat()
+            'upload_date': c.upload_date.isoformat(),
+            'grid_data': c.grid_data
         }
         for c in cities
     ])

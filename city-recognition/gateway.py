@@ -1,34 +1,44 @@
 from flask import Flask, request, render_template, redirect, jsonify, flash, Response, url_for
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import create_engine, text
 from recognizer.recognizer import recognize_city
-import os
 import qrcode
+import os
 import json
 from datetime import datetime
 from functools import wraps
 import ast
 
+# Main DB (long-term)
 app = Flask(__name__)
-
-# 1) enable sessions/flashing
 app.secret_key = os.getenv('SECRET_KEY', 'change-this-to-a-random-value')
-
-app.config["IMAGE_UPLOAD"] = "upload/img.png"
-
-# SQLite database configuration
 DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'city_data.db'))
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_PATH}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-# Database model
+# Viewer DB (latest 20)
+VIEWER_DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'city_viewer.db'))
+viewer_engine = create_engine(f'sqlite:///{VIEWER_DB_PATH}')
+
+# Create viewer table if not exists
+with viewer_engine.connect() as conn:
+    conn.execute(text('''
+        CREATE TABLE IF NOT EXISTS ViewerCity (
+            slot_id INTEGER PRIMARY KEY,
+            main_id INTEGER,
+            name TEXT,
+            grid_data TEXT,
+            upload_date DATETIME
+        )
+    '''))
+
 class City(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
     grid_data = db.Column(db.Text, nullable=False)
     upload_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-# Create database and tables
 with app.app_context():
     db.create_all()
 
@@ -72,7 +82,7 @@ def create_result(image, city_name):
     image.save(os.path.join("upload", "img.png"))  # Save with a fixed name
 
     grid = recognize_city("upload/img.png")
-    print(grid)
+
     # Save the grid data to the SQLite database
     id = save_to_database(grid, city_name)
 
@@ -81,14 +91,62 @@ def create_result(image, city_name):
 def save_to_database(grid, city_name):
     # save a JSON string, not repr(grid)
     payload = json.dumps(grid)
+    print(payload)
     new_city = City(name=city_name, grid_data=payload)
     db.session.add(new_city)
     db.session.commit()
+    # After saving to main DB, also update viewer DB
+    update_viewer_db(new_city)
     return new_city.id
 
+def update_viewer_db(city):
+    slot_id = ((city.id - 1) % 20) + 1
+    # debug log
+    print(f"[ViewerDB] syncing main_id={city.id} → slot_id={slot_id}")
+
+    # use a transactional begin() so we commit automatically
+    with viewer_engine.begin() as conn:
+        conn.execute(
+            text('''
+                INSERT INTO ViewerCity (slot_id, main_id, name, grid_data, upload_date)
+                VALUES (:slot_id, :main_id, :name, :grid_data, :upload_date)
+                ON CONFLICT(slot_id) DO UPDATE SET
+                    main_id=:main_id,
+                    name=:name,
+                    grid_data=:grid_data,
+                    upload_date=:upload_date
+            '''), {
+                'slot_id': slot_id,
+                'main_id': city.id,
+                'name': city.name,
+                'grid_data': city.grid_data,
+                'upload_date': city.upload_date.isoformat()
+            }
+        )
+
+def sync_main_db_to_viewer_db():
+    """
+    On startup, ensure the viewer DB has the latest 20 cities from the main DB.
+    """
+    with app.app_context():
+        latest = City.query.order_by(City.id.desc()).limit(20).all()[::-1]
+        print(">>> syncing main IDs:", [c.id for c in latest])
+        for c in latest:
+            update_viewer_db(c)
+
+# This function will run once before the first request to the application
+@app.before_request
+def initial_sync():
+    # A simple way to run this only once is to use a global flag or check app context
+    if not hasattr(app, 'sync_done'):
+        sync_main_db_to_viewer_db()
+        app.sync_done = True
+
 def create_link(id):
-    # Update link to point to local viewer
-    link = f"http://127.0.0.1:8000/#?id={id}"  # Assuming viewer runs on port 8000
+    # Update link to point to local viewer with a simple hash
+    # Use the slot_id for the link, not the main_id
+    slot_id = ((id - 1) % 20) + 1
+    link = f"http://127.0.0.1:8000/#{slot_id}"  # e.g., http://127.0.0.1:8000/#1
 
     qr = qrcode.QRCode(version=3, box_size=20, border=10, error_correction=qrcode.constants.ERROR_CORRECT_H)
     qr.add_data(link)
@@ -136,7 +194,7 @@ def api_ids():
             'id': c.id,
             'name': c.name,
             'upload_date': c.upload_date.isoformat(),
-            'grid_data': c.grid_data
+            'grid_data': json.loads(c.grid_data)
         }
         for c in cities
     ])
@@ -159,8 +217,73 @@ def api_city(city_id):
         'id': city.id,
         'name': city.name,
         'upload_date': city.upload_date.isoformat(),
-        'grid_data': grid
+        'grid_data': json.loads(grid)
     })
+
+@app.route('/api/viewer/ids')
+@requires_auth
+def api_viewer_ids():
+    with viewer_engine.connect() as conn:
+        rows = conn.execute(text('SELECT slot_id, name, upload_date, grid_data FROM ViewerCity ORDER BY slot_id')).fetchall()
+    return jsonify([
+        {
+            'slot_id': r.slot_id,
+            'name': r.name,
+            # upload_date is already stored as an ISO‐format string in the viewer DB,
+            # so just return it directly instead of calling .isoformat()
+            'upload_date': r.upload_date,
+            'grid_data': json.loads(r.grid_data)
+        }
+        for r in rows
+        if r.slot_id is not None
+    ])
+
+@app.route('/api/viewer/city/<int:slot_id>')
+@requires_auth
+def api_viewer_city(slot_id):
+    with viewer_engine.connect() as conn:
+        row = conn.execute(
+            text('SELECT slot_id, main_id, name, grid_data, upload_date FROM ViewerCity WHERE slot_id = :s'),
+            {'s': slot_id}
+        ).first()
+    if not row:
+        return jsonify({}), 404
+
+    return jsonify({
+        'slot_id': row.slot_id,
+        'main_id': row.main_id,
+        'name': row.name,
+        # same here: row.upload_date is already a string
+        'upload_date': row.upload_date,
+        'grid_data': json.loads(row.grid_data)
+    })
+
+@app.route('/api/viewer/debug')
+@requires_auth
+def api_viewer_debug():
+    """
+    Dump all rows in ViewerCity so you can verify the sync is happening.
+    """
+    with viewer_engine.connect() as conn:
+        rows = conn.execute(
+            text('SELECT slot_id, main_id, name, upload_date, grid_data FROM ViewerCity ORDER BY slot_id')
+        ).fetchall()
+
+    data = []
+    for r in rows:
+        try:
+            gd = json.loads(r.grid_data)
+        except:
+            gd = r.grid_data
+        data.append({
+            'slot_id': r.slot_id,
+            'main_id': r.main_id,
+            'name': r.name,
+            'upload_date': r.upload_date,
+            'grid_data': json.loads(gd)
+        })
+
+    return jsonify(data)
 
 # CORS headers for cross-origin requests
 @app.after_request
@@ -171,7 +294,7 @@ def after_request(response):
     return response
 
 if __name__ == '__main__':
-    # bind to 0.0.0.0 so other machines can curl in
+    # The @app.before_request handles the sync now, so no need to call it here.
     app.run(host='0.0.0.0', port=5000, debug=True)
 
     # From another machine just run:

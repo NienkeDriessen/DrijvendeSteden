@@ -5,6 +5,7 @@ import numpy as np
 def build_grid(recognized_buildings):
     coordinates = recognized_buildings.keys()
 
+
     # Find all the direct neighbours
     adjacent_hexagon, average_distance = find_adjacent_hexagon(coordinates)
 
@@ -123,7 +124,7 @@ def update_coords(recognized_buildings, grid):
         # print(new_coords)
         # print(old_coords)
         final_grid[str(new_coords)] = recognized_buildings[old_coords]
-
+    print(final_grid)
     return final_grid
 
 # Adjacent hexagon are found based on the distance between the coordinates.

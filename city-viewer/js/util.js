@@ -4,37 +4,37 @@ const API_PASS = 'secret';
 const API_BASE = 'http://127.0.0.1:5000';
 const AUTH_HEADER = 'Basic ' + btoa(`${API_USER}:${API_PASS}`);
 
-async function loadCityData(cityId) {
-    console.log(`→ fetching city ${cityId} from ${API_BASE}/api/city/${cityId}`);
-    const res = await fetch(`${API_BASE}/api/city/${cityId}`, {
+// 1) fetch only the latest‐20 viewer slots
+export async function getCityIDs() {
+    const res = await fetch(`${API_BASE}/api/viewer/ids`, {
         headers: { 'Authorization': AUTH_HEADER }
     });
-    console.log('← status', res.status);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const body = await res.json();
-    console.log('← payload', body);
-    return body;
+    console.log(res);
+    return res.json();  // -> [{slot_id, name, upload_date},…]
+}
+
+
+// 2) load a single slot’s full data
+async function loadCityData(slotId) {
+    const res = await fetch(`${API_BASE}/api/viewer/city/${slotId}`, {
+        headers: { 'Authorization': AUTH_HEADER }
+    });
+    console.log(res);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();  // -> {slot_id,main_id,name,upload_date,grid_data}
 }
 
 export async function load_city_definition() {
-    // normalize the hash into a pure numeric ID
-    const raw = window.location.hash.slice(1); // e.g. "2" or "?id=2"
-    let id = '1';                               // default
+    // normalize the hash into a pure numeric slot ID
+    const raw = window.location.hash.slice(1); // e.g., "1", "15", etc.
+    let slotId = raw || '1'; // Use the hash value, or default to '1'
 
-    if (raw.startsWith('?')) {
-        // parse "?id=2"
-        const params = new URLSearchParams(raw.slice(1));
-        id = params.get('id') || id;
-    } else if (raw) {
-        // parse "2"
-        id = raw;
-    }
-
-    const cityData = await loadCityData(id);
+    const cityData = await loadCityData(slotId);
     console.log('💾 raw cityData.grid_data:', cityData.grid_data);
 
     if (!cityData || !cityData.grid_data) {
-        console.warn(`No city data found for ID: ${id}`);
+        console.warn(`No city data found for slot: ${slotId}`);
         return { city_definition: {}, numCols: -1, numRows: -1 };
     }
 
@@ -63,20 +63,4 @@ function parseCoords(key) {
       : key;
     const parts = raw.split(',');
     return parts.map(p => parseInt(p.trim(), 10));
-}
-
-export async function getCityIDs() {
-    try {
-        const response = await fetch('http://127.0.0.1:5000/api/ids', {
-            headers: { 'Authorization': AUTH_HEADER }
-        });
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const cities = await response.json();  // now an array of {id, name, upload_date}
-        return cities;
-    } catch (error) {
-        console.error('Error loading city IDs:', error);
-        return [];
-    }
 }

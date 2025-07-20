@@ -224,10 +224,11 @@ def api_city(city_id):
 @requires_auth
 def api_viewer_ids():
     with viewer_engine.connect() as conn:
-        rows = conn.execute(text('SELECT slot_id, name, upload_date, grid_data FROM ViewerCity ORDER BY slot_id')).fetchall()
+        rows = conn.execute(text('SELECT slot_id, main_id, name, upload_date, grid_data FROM ViewerCity ORDER BY slot_id')).fetchall()
     return jsonify([
         {
             'slot_id': r.slot_id,
+            'main_id': r.main_id,
             'name': r.name,
             # upload_date is already stored as an ISO‐format string in the viewer DB,
             # so just return it directly instead of calling .isoformat()

@@ -78,10 +78,10 @@ async function populateCitySelector() {
 
     cities.forEach(city => {
         const option = document.createElement('option');
-        option.value = city.id;
+        option.value = city.slot_id;
         // format upload_date to a more human‐readable form if you like
         const date = new Date(city.upload_date).toLocaleDateString();
-        option.textContent = `City ${city.id}, "${city.name}". Upload date: ${date}`;
+        option.textContent = `City ${city.slot_id}, "${city.name}". Upload date: ${date}`;
         citySelector.appendChild(option);
     });
 

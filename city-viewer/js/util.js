@@ -10,7 +10,6 @@ export async function getCityIDs() {
         headers: { 'Authorization': AUTH_HEADER }
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    console.log(res);
     return res.json();  // -> [{slot_id, name, upload_date},…]
 }
 

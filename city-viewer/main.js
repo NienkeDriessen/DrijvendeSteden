@@ -13,7 +13,7 @@ function getCurrentCityId() {
 }
 
 function setCityTitle(cityId, cities) {
-  console.log("CITY LIST = ", cities)
+  console.log("CITY LIST = ", cities, " and city id = ", cityId)
   const city = cities.find(c => c.id === cityId);
   const titleEl = document.getElementById('cityNameTitle');
   titleEl.textContent = cities[cityId].name;
@@ -75,7 +75,9 @@ function createCityButton(city, index) {
   `;
   button.onclick = () => {
     window.location.hash = `#${city.id -1}`;
-    updateUI(); // instead of reload
+    updateUI(); 
+    //HERE THE CITY ONLY CHANGES IF I DO RELOAD? 
+    // location.reload();
   };
   return button;
 }
@@ -100,13 +102,39 @@ async function updateUI() {
   const currentId = getCurrentCityId();
   setCityTitle(currentId, cities);
   populateMenuButtons(cities);
+
+  // Don't update city if scene isn't ready yet
+  if (!scene) {
+    console.warn("Scene not initialized yet, skipping city update.");
+    return;
+  }
+
+  // Remove existing city from scene
+  if (city) {
+    scene.remove(city);
+    city.traverse(child => {
+      if (child.geometry) child.geometry.dispose();
+      if (child.material) {
+        if (Array.isArray(child.material)) {
+          child.material.forEach(m => m.dispose());
+        } else {
+          child.material.dispose();
+        }
+      }
+    });
+  } else {
+    console.log("city is undefined?")
+  }
+
+  // Add new city to scene
+  city = await createCity(scene);
 }
 
 async function main() {
   setupMenuToggle();
   await updateUI();
   await initScene();
-  window.addEventListener('hashchange', updateUI);
+  // window.addEventListener('hashchange', updateUI);
 }
 
 main();

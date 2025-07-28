@@ -8,6 +8,8 @@ import json
 from datetime import datetime
 from functools import wraps
 import ast
+import threading
+import time
 
 # Main DB (long-term)
 app = Flask(__name__)
@@ -41,52 +43,6 @@ class City(db.Model):
 
 with app.app_context():
     db.create_all()
-
-@app.route("/", methods=["GET", "POST"])
-def upload_image():
-    if request.method == "POST":
-        image = request.files.get("image")
-        city_name = request.form.get("city_name")
-
-        if not image:
-            flash('No image uploaded!', 'error')
-            return render_template("upload_image.html")
-
-        if not city_name:
-            flash('City name is required!', 'error')
-            return render_template("upload_image.html")
-
-        # Check for duplicate city name
-        existing_city = City.query.filter_by(name=city_name).first()
-        if existing_city:
-            flash('City name already exists. Please choose a different name.', 'error')
-            return render_template("upload_image.html")
-
-        # Save & get new ID
-        id = create_result(image, city_name)
-
-        # 2) PRG: redirect to a GET route instead of rendering directly
-        return redirect(url_for('show_link', city_id=id))
-
-    return render_template("upload_image.html")
-
-# 3) new GET‐only endpoint to display the link/QR
-@app.route("/link/<int:city_id>")
-def show_link(city_id):
-    return create_link(city_id)
-
-def create_result(image, city_name):
-    if not os.path.exists("upload"):
-        os.makedirs("upload")
-
-    image.save(os.path.join("upload", "img.png"))  # Save with a fixed name
-
-    grid = recognize_city("upload/img.png")
-
-    # Save the grid data to the SQLite database
-    id = save_to_database(grid, city_name)
-
-    return id
 
 def save_to_database(grid, city_name):
     # save a JSON string, not repr(grid)
@@ -134,13 +90,57 @@ def sync_main_db_to_viewer_db():
         for c in latest:
             update_viewer_db(c)
 
-# This function will run once before the first request to the application
-@app.before_request
-def initial_sync():
-    # A simple way to run this only once is to use a global flag or check app context
-    if not hasattr(app, 'sync_done'):
+def periodic_sync():
+    while True:
+        print("Running periodic sync...")
         sync_main_db_to_viewer_db()
-        app.sync_done = True
+        time.sleep(5 * 60)  # Perform database sync every 5 min
+
+@app.route("/", methods=["GET", "POST"])
+def upload_image():
+    if request.method == "POST":
+        image = request.files.get("image")
+        city_name = request.form.get("city_name")
+
+        if not image:
+            flash('No image uploaded!', 'error')
+            return render_template("upload_image.html")
+
+        if not city_name:
+            flash('City name is required!', 'error')
+            return render_template("upload_image.html")
+
+        # Check for duplicate city name
+        existing_city = City.query.filter_by(name=city_name).first()
+        if existing_city:
+            flash('City name already exists. Please choose a different name.', 'error')
+            return render_template("upload_image.html")
+
+        # Save & get new ID
+        id = create_result(image, city_name)
+
+        # 2) PRG: redirect to a GET route instead of rendering directly
+        return redirect(url_for('show_link', city_id=id))
+
+    return render_template("upload_image.html")
+
+# 3) new GET‐only endpoint to display the link/QR
+@app.route("/link/<int:city_id>")
+def show_link(city_id):
+    return create_link(city_id)
+
+def create_result(image, city_name):
+    if not os.path.exists("upload"):
+        os.makedirs("upload")
+
+    image.save(os.path.join("upload", "img.png"))  # Save with a fixed name
+
+    grid = recognize_city("upload/img.png")
+
+    # Save the grid data to the SQLite database
+    id = save_to_database(grid, city_name)
+
+    return id
 
 def create_link(id):
     # Update link to point to local viewer with a simple hash
@@ -295,7 +295,14 @@ def after_request(response):
     return response
 
 if __name__ == '__main__':
-    # The @app.before_request handles the sync now, so no need to call it here.
+    # Initial sync
+    with app.app_context():
+        sync_main_db_to_viewer_db()
+
+    # Start the periodic sync in a background thread
+    threading.Thread(target=periodic_sync, daemon=True).start()
+
+    # bind to 0.0.0.0 so other machines can curl in
     app.run(host='0.0.0.0', port=5000, debug=True)
 
     # From another machine just run:

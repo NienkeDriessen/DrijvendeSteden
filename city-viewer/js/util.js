@@ -1,7 +1,7 @@
 // ← add your API_USER/API_PASS here (or import from a config module)
 const API_USER = 'admin';
 const API_PASS = 'secret';
-const API_BASE = 'http://127.0.0.1:5000';
+const API_BASE = 'http://127.0.0.1:5050';
 const AUTH_HEADER = 'Basic ' + btoa(`${API_USER}:${API_PASS}`);
 const API_HOST = 'http://192.168.178.101:5050'; // ← IP of your laptop & port of Flask
 

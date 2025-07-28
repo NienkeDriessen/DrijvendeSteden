@@ -9,14 +9,20 @@ import { getCityIDs } from './js/util';
 let scene, camera, renderer, controls, water, sky, city;
 
 function getCurrentCityId() {
-  return window.location.hash ? window.location.hash.slice(1) : '1';
+  // Parse the hash as a number
+  return parseInt(window.location.hash.slice(1), 10) || 1;
 }
 
 function setCityTitle(cityId, cities) {
   console.log("CITY LIST = ", cities, " and city id = ", cityId)
-  const city = cities.find(c => c.id === cityId);
+  // Use c.slot_id === cityId instead of c.id === cityId
+  const city = cities.find(c => c.slot_id === cityId);
   const titleEl = document.getElementById('cityNameTitle');
-  titleEl.textContent = cities[cityId].name;
+  if (city) {
+      titleEl.textContent = city.name;
+  } else {
+      titleEl.textContent = "City Not Found";
+  }
 }
 
 async function initScene() {
@@ -74,10 +80,9 @@ function createCityButton(city, index) {
     </div>
   `;
   button.onclick = () => {
-    window.location.hash = `#${city.id -1}`;
-    updateUI(); 
-    //HERE THE CITY ONLY CHANGES IF I DO RELOAD? 
-    // location.reload();
+    // Use city.slot_id instead of city.id - 1
+    window.location.hash = `#${city.slot_id}`;
+    updateUI();
   };
   return button;
 }

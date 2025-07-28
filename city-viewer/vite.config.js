@@ -1,11 +1,14 @@
 import { defineConfig } from 'vite';
+import basicSsl from '@vitejs/plugin-basic-ssl';
 
 export default defineConfig({
+  plugins: [
+    // This plugin will automatically generate and trust a self-signed certificate.
+    basicSsl()
+  ],
   server: {
-    // Enable HTTPS. Vite will automatically generate a self-signed certificate.
-    https: true,
+    // The `https` option is no longer needed here, as the plugin handles it.
     // This allows Vite to accept requests from your public server address.
-    // Note: It's better to be specific with hostnames than allowing all.
     allowedHosts: [
       'sciencecentreontour.tudelft.nl'
     ],

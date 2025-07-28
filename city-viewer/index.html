@@ -1,27 +1,28 @@
-<!DOCTYPE html>
-<html>
 <head>
-    <title>Drijvende Stad Viewer</title>
-    <style>
-        body { margin: 0; }
-        canvas { display: block; }
-    </style>
+	<link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <select id="citySelector"></select>
-    <script type="module" src="main.js"></script>
-    <script>
-        // Function to set the city ID based on the URL hash
-        function setCityIdFromHash() {
-            const cityId = window.location.hash ? window.location.hash.slice(1) : '1';
-            document.getElementById('citySelector').value = cityId;
-        }
+    <!-- <select id="citySelector"></select> -->
+  <!-- <button id="menuButton" src="public\assets\Menu.svg">Menu</button> -->
+  <h2 id="cityNameTitle"></h2>
+  <img src="\assets\Menu.svg" id="menuIcon" onclick="">
+  <div id="menuOverlay">
+    <!-- <div class="wave">
+      <svg viewBox="0 0 1200 100" preserveAspectRatio="none">
+        <path d="M0,50 
+         C150,0 300,100 450,50 
+         C600,0 750,100 900,50 
+         C1050,0 1200,100 1350,50 
+         L1350,100 L0,100 Z" />
+      </svg>
+    </div> -->
+    <div class="menuContent">
+      <h2 class="title">Drijvende Steden</h2>
+    </div>
+    <div class="container">
+    </div>
+  </div>
 
-        // Listen for hash changes
-        window.addEventListener('hashchange', setCityIdFromHash);
+  <script type="module" src="main.js"></script>
 
-        // Call setCityIdFromHash on initial load
-        setCityIdFromHash();
-    </script>
 </body>
-</html>

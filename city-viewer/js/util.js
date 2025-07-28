@@ -3,6 +3,8 @@ const API_USER = 'admin';
 const API_PASS = 'secret';
 const API_BASE = 'http://127.0.0.1:5000';
 const AUTH_HEADER = 'Basic ' + btoa(`${API_USER}:${API_PASS}`);
+const API_HOST = 'http://192.168.178.101:5050'; // ← IP of your laptop & port of Flask
+
 
 // 1) fetch only the latest‐20 viewer slots
 export async function getCityIDs() {

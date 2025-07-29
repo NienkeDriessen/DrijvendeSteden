@@ -220,8 +220,8 @@ def api_city(city_id):
         'grid_data': json.loads(grid)
     })
 
+# THIS ENDPOINT IS NOW PUBLIC FOR THE VIEWER
 @app.route('/api/viewer/ids')
-@requires_auth
 def api_viewer_ids():
     with viewer_engine.connect() as conn:
         rows = conn.execute(text('SELECT slot_id, main_id, name, upload_date, grid_data FROM ViewerCity ORDER BY slot_id')).fetchall()
@@ -239,8 +239,8 @@ def api_viewer_ids():
         if r.slot_id is not None
     ])
 
+# THIS ENDPOINT IS NOW PUBLIC FOR THE VIEWER
 @app.route('/api/viewer/city/<int:slot_id>')
-@requires_auth
 def api_viewer_city(slot_id):
     with viewer_engine.connect() as conn:
         row = conn.execute(

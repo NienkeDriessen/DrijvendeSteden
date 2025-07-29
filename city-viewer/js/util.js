@@ -1,18 +1,13 @@
-// ← add your API_USER/API_PASS here (or import from a config module)
-const API_USER = 'admin';
-const API_PASS = 'secret';
 // Use the public, HTTP URL of your Flask backend
 const API_BASE = 'http://sciencecentreontour.tudelft.nl:5050';
-const AUTH_HEADER = 'Basic ' + btoa(`${API_USER}:${API_PASS}`);
 // ... existing code ...
 const API_HOST = 'http://192.168.178.101:5050'; // ← IP of your laptop & port of Flask
 
 
 // 1) fetch only the latest‐20 viewer slots
 export async function getCityIDs() {
-    const res = await fetch(`${API_BASE}/api/viewer/ids`, {
-        headers: { 'Authorization': AUTH_HEADER }
-    });
+    // No 'headers' needed for a public endpoint
+    const res = await fetch(`${API_BASE}/api/viewer/ids`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.json();  // -> [{slot_id, name, upload_date},…]
 }
@@ -20,9 +15,8 @@ export async function getCityIDs() {
 
 // 2) load a single slot’s full data
 async function loadCityData(slotId) {
-    const res = await fetch(`${API_BASE}/api/viewer/city/${slotId}`, {
-        headers: { 'Authorization': AUTH_HEADER }
-    });
+    // No 'headers' needed for a public endpoint
+    const res = await fetch(`${API_BASE}/api/viewer/city/${slotId}`);
     console.log(res);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.json();  // -> {slot_id,main_id,name,upload_date,grid_data}

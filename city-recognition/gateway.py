@@ -302,6 +302,7 @@ if __name__ == '__main__':
     # Start the periodic sync in a background thread
     threading.Thread(target=periodic_sync, daemon=True).start()
 
+
     # Run on HTTP, no SSL context
     app.run(host='0.0.0.0', port=5050, debug=True)
 

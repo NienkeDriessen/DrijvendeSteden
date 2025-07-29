@@ -1,9 +1,10 @@
 // ← add your API_USER/API_PASS here (or import from a config module)
 const API_USER = 'admin';
 const API_PASS = 'secret';
-// Use the public, secure URL of your Flask backend
-const API_BASE = 'https://sciencecentreontour.tudelft.nl:5050';
+// Use the public, HTTP URL of your Flask backend
+const API_BASE = 'http://sciencecentreontour.tudelft.nl:5050';
 const AUTH_HEADER = 'Basic ' + btoa(`${API_USER}:${API_PASS}`);
+// ... existing code ...
 const API_HOST = 'http://192.168.178.101:5050'; // ← IP of your laptop & port of Flask
 
 

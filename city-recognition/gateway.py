@@ -302,10 +302,11 @@ if __name__ == '__main__':
     # Start the periodic sync in a background thread
     threading.Thread(target=periodic_sync, daemon=True).start()
 
-    context = ('cert.crt', 'cert.key')
+    # Run on HTTP, no SSL context
+    app.run(host='0.0.0.0', port=5050, debug=True)
 
-    # bind to 0.0.0.0 so other machines can curl in
-    app.run(host='0.0.0.0', port=5050, debug=True, ssl_context=context)
+    # From another machine just run:
+    # curl -u youruser:yourpass http://SERVER_IP:5050/api/ids
 
     # From another machine just run:
     # curl -u youruser:yourpass http://SERVER_IP:5000/api/ids

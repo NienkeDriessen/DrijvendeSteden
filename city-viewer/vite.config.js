@@ -1,14 +1,14 @@
 import { defineConfig } from 'vite';
-import basicSsl from '@vitejs/plugin-basic-ssl';
+import fs from 'fs';
 
 export default defineConfig({
-  plugins: [
-    // This plugin will automatically generate and trust a self-signed certificate.
-    basicSsl()
-  ],
+  // Remove the basic-ssl plugin if it's there
   server: {
-    // The `https` option is no longer needed here, as the plugin handles it.
-    // This allows Vite to accept requests from your public server address.
+    https: {
+      // Adjust paths if you run vite from a different directory
+      key: fs.readFileSync('../cert.key'),
+      cert: fs.readFileSync('../cert.crt'),
+    },
     allowedHosts: [
       'sciencecentreontour.tudelft.nl'
     ],

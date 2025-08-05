@@ -1,0 +1,97 @@
+Traceback (most recent call last):
+  File "C:\Rec\UniStuff\SCD\floating_cities\DrijvendeSteden\city-recognition\gateway.py", line 300, in <module>
+    sync_main_db_to_viewer_db()
+  File "C:\Rec\UniStuff\SCD\floating_cities\DrijvendeSteden\city-recognition\gateway.py", line 91, in sync_main_db_to_viewer_db
+    update_viewer_db(c)
+  File "C:\Rec\UniStuff\SCD\floating_cities\DrijvendeSteden\city-recognition\gateway.py", line 61, in update_viewer_db
+    print(f"[ViewerDB] syncing main_id={city.id} \u2192 slot_id={slot_id}")
+  File "C:\Users\sahir\AppData\Local\Programs\Python\Python39\lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2192' in position 29: character maps to <undefined>
+Traceback (most recent call last):
+  File "C:\Rec\UniStuff\SCD\floating_cities\DrijvendeSteden\city-recognition\gateway.py", line 300, in <module>
+    sync_main_db_to_viewer_db()
+  File "C:\Rec\UniStuff\SCD\floating_cities\DrijvendeSteden\city-recognition\gateway.py", line 91, in sync_main_db_to_viewer_db
+    update_viewer_db(c)
+  File "C:\Rec\UniStuff\SCD\floating_cities\DrijvendeSteden\city-recognition\gateway.py", line 61, in update_viewer_db
+    print(f"[ViewerDB] syncing main_id={city.id} \u2192 slot_id={slot_id}")
+  File "C:\Users\sahir\AppData\Local\Programs\Python\Python39\lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2192' in position 29: character maps to <undefined>
+Traceback (most recent call last):
+  File "C:\Rec\UniStuff\SCD\floating_cities\DrijvendeSteden\city-recognition\gateway.py", line 300, in <module>
+    sync_main_db_to_viewer_db()
+  File "C:\Rec\UniStuff\SCD\floating_cities\DrijvendeSteden\city-recognition\gateway.py", line 91, in sync_main_db_to_viewer_db
+    update_viewer_db(c)
+  File "C:\Rec\UniStuff\SCD\floating_cities\DrijvendeSteden\city-recognition\gateway.py", line 61, in update_viewer_db
+    print(f"[ViewerDB] syncing main_id={city.id} \u2192 slot_id={slot_id}")
+  File "C:\Users\sahir\AppData\Local\Programs\Python\Python39\lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2192' in position 29: character maps to <undefined>
+Traceback (most recent call last):
+  File "C:\Rec\UniStuff\SCD\floating_cities\DrijvendeSteden\city-recognition\gateway.py", line 300, in <module>
+    sync_main_db_to_viewer_db()
+  File "C:\Rec\UniStuff\SCD\floating_cities\DrijvendeSteden\city-recognition\gateway.py", line 91, in sync_main_db_to_viewer_db
+    update_viewer_db(c)
+  File "C:\Rec\UniStuff\SCD\floating_cities\DrijvendeSteden\city-recognition\gateway.py", line 61, in update_viewer_db
+    print(f"[ViewerDB] syncing main_id={city.id} \u2192 slot_id={slot_id}")
+  File "C:\Users\sahir\AppData\Local\Programs\Python\Python39\lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2192' in position 29: character maps to <undefined>
+Traceback (most recent call last):
+  File "C:\Rec\UniStuff\SCD\floating_cities\DrijvendeSteden\city-recognition\gateway.py", line 300, in <module>
+    sync_main_db_to_viewer_db()
+  File "C:\Rec\UniStuff\SCD\floating_cities\DrijvendeSteden\city-recognition\gateway.py", line 91, in sync_main_db_to_viewer_db
+    update_viewer_db(c)
+  File "C:\Rec\UniStuff\SCD\floating_cities\DrijvendeSteden\city-recognition\gateway.py", line 61, in update_viewer_db
+    print(f"[ViewerDB] syncing main_id={city.id} \u2192 slot_id={slot_id}")
+  File "C:\Users\sahir\AppData\Local\Programs\Python\Python39\lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2192' in position 29: character maps to <undefined>
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5050
+ * Running on http://145.94.240.183:5050
+Press CTRL+C to quit
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 106-778-777
+127.0.0.1 - - [05/Aug/2025 16:52:51] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2025 16:52:51] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2025 16:52:51] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2025 16:52:52] "GET /static/bootstrap/js/bootstrap.min.js HTTP/1.1" 304 -
+127.0.0.1 - - [05/Aug/2025 16:52:52] "GET /static/bootstrap/css/bootstrap.min.css HTTP/1.1" 304 -
+127.0.0.1 - - [05/Aug/2025 16:52:52] "GET /static/jquery/jquery.min.js HTTP/1.1" 304 -
+127.0.0.1 - - [05/Aug/2025 16:52:52] "GET /static/popper/popper.min.js HTTP/1.1" 304 -
+127.0.0.1 - - [05/Aug/2025 16:52:58] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2025 16:52:59] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2025 16:53:56] "POST / HTTP/1.1" 302 -
+127.0.0.1 - - [05/Aug/2025 16:53:56] "GET /link/27 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2025 16:53:56] "GET /static/qr_code.png HTTP/1.1" 200 -
+ * Detected change in 'C:\\Rec\\UniStuff\\SCD\\floating_cities\\DrijvendeSteden\\city-recognition\\gateway.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 106-778-777
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5050
+ * Running on http://145.94.240.183:5050
+Press CTRL+C to quit
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 106-778-777
+127.0.0.1 - - [05/Aug/2025 17:00:10] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2025 17:00:10] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2025 17:00:10] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2025 17:00:11] "GET /static/bootstrap/css/bootstrap.min.css HTTP/1.1" 304 -
+127.0.0.1 - - [05/Aug/2025 17:00:11] "GET /static/bootstrap/js/bootstrap.min.js HTTP/1.1" 304 -
+127.0.0.1 - - [05/Aug/2025 17:00:11] "GET /static/popper/popper.min.js HTTP/1.1" 304 -
+127.0.0.1 - - [05/Aug/2025 17:00:11] "GET /static/jquery/jquery.min.js HTTP/1.1" 304 -
+127.0.0.1 - - [05/Aug/2025 17:00:21] "POST / HTTP/1.1" 302 -
+127.0.0.1 - - [05/Aug/2025 17:00:21] "GET /link/28 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2025 17:00:22] "GET /static/qr_code.png HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2025 17:00:22] "GET /link/28 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2025 17:00:23] "GET /link/28 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2025 17:00:23] "GET /static/qr_code.png HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2025 17:00:34] "GET /link/28 HTTP/1.1" 200 -
+127.0.0.1 - - [05/Aug/2025 17:00:34] "GET /static/qr_code.png HTTP/1.1" 200 -

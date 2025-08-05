@@ -58,7 +58,7 @@ def save_to_database(grid, city_name):
 def update_viewer_db(city):
     slot_id = ((city.id - 1) % 20) + 1
     # debug log
-    print(f"[ViewerDB] syncing main_id={city.id} → slot_id={slot_id}")
+    print(f"[ViewerDB] syncing main_id={city.id} > slot_id={slot_id}")
 
     # use a transactional begin() so we commit automatically
     with viewer_engine.begin() as conn:
@@ -153,9 +153,9 @@ def create_link(id):
     qr.make(fit=True)
     img = qr.make_image(fill_color="black", back_color="white")
 
-    qr_path = "city-recognition/static/qr_code.png"
-    if not os.path.exists("city-recognition/static"):
-        os.makedirs("city-recognition/static")
+    qr_path = "static/qr_code.png"
+    if not os.path.exists("static"):
+        os.makedirs("static")
 
     img.save(qr_path)
 
@@ -301,7 +301,6 @@ if __name__ == '__main__':
 
     # Start the periodic sync in a background thread
     threading.Thread(target=periodic_sync, daemon=True).start()
-
 
     # Run on HTTP, no SSL context
     app.run(host='0.0.0.0', port=5050, debug=True)

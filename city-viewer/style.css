@@ -26,8 +26,8 @@ body {
 #menuIcon {
   width: 10%;
   position: fixed;
-  top: 20px;
-  right: 20px;
+  top: 60px;
+  right: 60px;
 }
 
 #menuOverlay {
@@ -173,7 +173,7 @@ body {
 /* Landscape phones and tablets */
 @media only screen and (min-width: 600px) and (max-width: 991px) {
   #menuIcon {
-    width: 6%;
+    width: 7%;
   }
 
   .city_name {
@@ -184,7 +184,7 @@ body {
 /* Portrait phones */
 @media only screen and (orientation: portrait) {
   #menuIcon {
-    width: 15%;
+    width: 12%;
   }
   .title {
     font-size:100px;
@@ -217,14 +217,14 @@ body {
 /* Desktops */
 @media only screen and (min-width: 992px) {
   #menuIcon {
-    width: 4%;
+    width: 5%;
   }
 }
 
 /* Desktops */
 @media only screen and (min-width: 992px) and (orientation: portrait){
   #menuIcon {
-    width: 8%;
+    width: 7%;
   }
 }
 

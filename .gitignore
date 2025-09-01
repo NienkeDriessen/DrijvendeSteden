@@ -3,3 +3,5 @@ __pycache__
 .vite
 node_modules
 *.code-workspace
+recog_LOG.txt
+recog_ERROR.txt

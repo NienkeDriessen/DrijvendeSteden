@@ -1,6 +1,7 @@
 .venv
 upload
-
+*_ERROR.txt
+*_LOG.txt
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

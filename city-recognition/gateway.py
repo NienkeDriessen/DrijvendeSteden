@@ -146,7 +146,7 @@ def create_link(id):
     # Update link to point to local viewer with a simple hash
     # Use the slot_id for the link, not the main_id
     slot_id = ((id - 1) % 20) + 1
-    link = f"http://127.0.0.1:8000/#{slot_id}"  # e.g., http://127.0.0.1:8000/#1
+    link = f"http://sciencecentreontour.tudelft.nl/#{slot_id}"  # e.g., http://127.0.0.1:8000/#1
 
     qr = qrcode.QRCode(version=3, box_size=20, border=10, error_correction=qrcode.constants.ERROR_CORRECT_H)
     qr.add_data(link)

@@ -6,7 +6,7 @@ body {
 
 @font-face {
   font-family: 'TitleFont';
-  src: url("/fonnts.com-Alkaline_Caps_Heavy (1).otf") format('opentype');
+  src: url("/assets/font_title.otf") format('opentype');
 }
 
 /* #menuButton {

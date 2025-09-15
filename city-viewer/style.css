@@ -168,6 +168,14 @@ body {
   opacity: 0.8;
 }
 
+.watermark {
+  position: fixed;      /* stays visible when scrolling */
+  bottom: 1%;   
+  width: 100%;   
+  opacity: 0.6;  
+  pointer-events: none; /* clicks pass through */
+}
+
 
 
 /* Landscape phones and tablets */
@@ -180,6 +188,12 @@ body {
     font-size: 30px;
     font-weight: bold;
   }
+
+  .watermark {
+    bottom: 1%;   
+    width: 60%;   
+  }
+
 }
 /* Portrait phones */
 @media only screen and (orientation: portrait) {
@@ -211,6 +225,11 @@ body {
     margin: 0;
   }
 
+  .watermark {
+    bottom: 1%;   
+    width: 100%;   
+  }
+
 
 }
 
@@ -218,6 +237,10 @@ body {
 @media only screen and (min-width: 992px) {
   #menuIcon {
     width: 5%;
+  }
+
+  .watermark {  
+    width: 50%;   
   }
 }
 
@@ -227,4 +250,5 @@ body {
     width: 7%;
   }
 }
+
 

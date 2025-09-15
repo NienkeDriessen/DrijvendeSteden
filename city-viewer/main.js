@@ -82,7 +82,6 @@ function createCityButton(city, index) {
   button.onclick = () => {
     // Use city.slot_id instead of city.id - 1
     window.location.hash = `#${city.slot_id}`;
-    updateUI();
   };
   return button;
 }
@@ -113,7 +112,7 @@ async function updateUI() {
     console.warn("Scene not initialized yet, skipping city update.");
     return;
   }
-
+  document.getElementById('menuOverlay').classList.toggle('active');
   // Remove existing city from scene
   if (city) {
     scene.remove(city);
@@ -133,13 +132,21 @@ async function updateUI() {
 
   // Add new city to scene
   city = await createCity(scene);
+  
 }
 
 async function main() {
   setupMenuToggle();
+
+  // If there is no hash (""), force menu to start open
+  const noHash = window.location.hash === "";
+  if (noHash) {
+    document.getElementById('menuOverlay').classList.add('active');
+  }
   await updateUI();
   await initScene();
-  // window.addEventListener('hashchange', updateUI);
+  // Re-run updateUI whenever the hash changes
+  window.addEventListener('hashchange', updateUI);
 }
 
 main();

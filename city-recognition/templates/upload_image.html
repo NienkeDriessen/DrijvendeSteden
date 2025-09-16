@@ -20,15 +20,15 @@
         {% endwith %}
         <form action="/" method="POST" enctype="multipart/form-data">
             <div class="form-group" style="margin-bottom:0.5cm;">
-                <label for="city_name">Type a name for your city (Must be between 6-12 alpha-numeric characters)</label>
+                <label for="city_name">Type a name for your city (Must be between 2-25 alpha-numeric characters, dashes, or underscores)</label>
                 <input 
                     type="text" 
                     class="form-control" 
                     id="city_name" 
                     name="city_name" 
                     required
-                    pattern="^[a-zA-Z0-9]{6,12}$"
-                    title="City name must be between 6 and 12 alphanumeric characters"
+                    pattern="^[a-zA-Z0-9_\-]{2,25}$"
+                    title="City name must be between 2 and 30 characters. You can use alphanumeric, dashes -, or underscores _ "
                 >
             </div>
             <div class="form-group">

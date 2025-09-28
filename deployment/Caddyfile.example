@@ -40,12 +40,9 @@ sciencecentreontour.tudelft.nl {
     }
 }
 
-# Redirect plain HTTP requests on :5050 to HTTPS
-http://sciencecentreontour.tudelft.nl:5050 {
-    redir https://sciencecentreontour.tudelft.nl:5050{uri}
-}
-
-# Serve the recognition UI on :5050 with TLS and forward to Flask
+# Serve the recognition UI on :5050 with TLS and forward to Flask.
+# Browsers must use https://…:5050 directly; plain HTTP on that port
+# cannot be multiplexed with HTTPS and will fail by design.
 https://sciencecentreontour.tudelft.nl:5050 {
     reverse_proxy 127.0.0.1:5050
 

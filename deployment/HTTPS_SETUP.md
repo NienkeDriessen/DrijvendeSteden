@@ -15,7 +15,7 @@ which terminates TLS and proxies requests to the existing Windows services.
 
 Open inbound ports **80**, **443**, and **5050** on the Windows host and any upstream
 firewalls. Port 80 is required for ACME/Let's Encrypt challenges, port 443 serves the
-viewer, and port 5050 exposes the recognition UI behind TLS.
+viewer, and port 5050 exposes the recognition UI behind TLS (HTTPS only).
 
 ## 2. Prepare the applications
 
@@ -61,8 +61,8 @@ The provided configuration:
 - Proxies `/api/*`, `/link/*`, `/static/*`, and `/upload/*` to the Flask backend
   on `127.0.0.1:5050`.
 - Terminates TLS on `https://sciencecentreontour.tudelft.nl:5050` and forwards the
-   recognition UI to the Flask app, while redirecting `http://sciencecentreontour.tudelft.nl:5050`
-   to the HTTPS version.
+   recognition UI to the Flask app. Browsers must use HTTPS on that port; HTTP on
+   port 5050 cannot be redirected because HTTP and HTTPS can't share a non-standard port.
 - Adds HSTS and other basic security headers.
 - Redirects all HTTP traffic (port 80) to HTTPS automatically (Caddy default).
 
@@ -102,9 +102,8 @@ If you prefer to run Caddy in the foreground for debugging:
    curl https://sciencecentreontour.tudelft.nl/api/viewer/ids
    ```
 
-   4. Browse to <http://sciencecentreontour.tudelft.nl:5050> and verify it redirects to the
-      HTTPS version on the same port. Then confirm the recognition UI loads at
-      <https://sciencecentreontour.tudelft.nl:5050>.
+   4. Confirm the recognition UI loads at <https://sciencecentreontour.tudelft.nl:5050>.
+      (Direct HTTP on port 5050 will fail by design.)
    5. Upload a new city from the recognition UI and confirm the generated QR code
       now uses the HTTPS base URL.
 

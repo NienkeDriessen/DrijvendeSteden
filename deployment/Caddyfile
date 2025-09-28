@@ -18,6 +18,22 @@ https://sciencecentreontour.tudelft.nl {
         reverse_proxy 127.0.0.1:5050
     }
 
+    # Serve the recognition UI at /recognition on the same domain
+    @recognition path /recognition* /api/recognition*
+    handle @recognition {
+        reverse_proxy 127.0.0.1:5050
+
+        header {
+            Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+            Referrer-Policy "strict-origin-when-cross-origin"
+            X-Content-Type-Options "nosniff"
+        }
+
+        log {
+            output file C:\Rec\Logs\caddy\recognition-access.log
+        }
+    }
+
     # Serve the viewer SPA and fall back to index.html for history API routing
     handle {
         file_server
@@ -29,23 +45,5 @@ https://sciencecentreontour.tudelft.nl {
         Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
         Referrer-Policy "strict-origin-when-cross-origin"
         X-Content-Type-Options "nosniff"
-    }
-}
-
-
-
-# Serve the recognition UI at /recognition on the same domain
-@recognition path /recognition* /api/recognition*
-handle @recognition {
-    reverse_proxy 127.0.0.1:5050
-
-    header {
-        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-        Referrer-Policy "strict-origin-when-cross-origin"
-        X-Content-Type-Options "nosniff"
-    }
-
-    log {
-        output file C:\Rec\Logs\caddy\recognition-access.log
     }
 }

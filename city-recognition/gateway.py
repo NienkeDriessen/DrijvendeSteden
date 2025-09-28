@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template, redirect, jsonify, flash, Response, url_for
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine, text
+from werkzeug.middleware.proxy_fix import ProxyFix
 from recognizer.recognizer import recognize_city
 import qrcode
 import os
@@ -22,6 +23,12 @@ db = SQLAlchemy(app)
 # Viewer DB (latest 20)
 VIEWER_DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'city_viewer.db'))
 viewer_engine = create_engine(f'sqlite:///{VIEWER_DB_PATH}')
+
+# Proxy / deployment configuration
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+app.config['PREFERRED_URL_SCHEME'] = os.getenv('PREFERRED_URL_SCHEME', 'http')
+FRONTEND_BASE_URL = os.getenv('VIEWER_BASE_URL', 'http://localhost:4173')
+FRONTEND_ORIGIN = os.getenv('FRONTEND_ORIGIN', '*')
 
 # Create viewer table if not exists
 with viewer_engine.connect() as conn:
@@ -146,7 +153,8 @@ def create_link(id):
     # Update link to point to local viewer with a simple hash
     # Use the slot_id for the link, not the main_id
     slot_id = ((id - 1) % 20) + 1
-    link = f"http://sciencecentreontour.tudelft.nl/#{slot_id}"  # e.g., http://127.0.0.1:8000/#1
+    base_url = FRONTEND_BASE_URL.rstrip('/')
+    link = f"{base_url}/#{slot_id}"  # e.g., https://viewer.example.com/#1
 
     qr = qrcode.QRCode(version=3, box_size=20, border=10, error_correction=qrcode.constants.ERROR_CORRECT_H)
     qr.add_data(link)
@@ -289,7 +297,7 @@ def api_viewer_debug():
 # CORS headers for cross-origin requests
 @app.after_request
 def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Origin', FRONTEND_ORIGIN)
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
     return response

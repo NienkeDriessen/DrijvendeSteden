@@ -10,10 +10,7 @@
 # the full path with `caddy run --config C:\path\to\Caddyfile`.
 # Replace the placeholders in ALL_CAPS with real values for your environment.
 
-sciencecentreontour.tudelft.nl {
-    # Serve the pre-built viewer (npm run build)
-    root * C:\Rec\UniStuff\SCD\floating_cities\DrijvendeSteden\city-viewer\dist
-    encode gzip zstd
+https://sciencecentreontour.tudelft.nl {
 
     # Route API and gateway assets to the Flask service
     @backend path /api/* /link/* /static/* /upload/*
@@ -33,17 +30,13 @@ sciencecentreontour.tudelft.nl {
         Referrer-Policy "strict-origin-when-cross-origin"
         X-Content-Type-Options "nosniff"
     }
-
-    # Access/error logs (optional)
-    log {
-        output file C:\Rec\Logs\caddy\access.log
-    }
 }
 
-# Serve the recognition UI on :5050 with TLS and forward to Flask.
-# Browsers must use https://…:5050 directly; plain HTTP on that port
-# cannot be multiplexed with HTTPS and will fail by design.
-https://sciencecentreontour.tudelft.nl:5050 {
+
+
+# Serve the recognition UI at /recognition on the same domain
+@recognition path /recognition* /api/recognition*
+handle @recognition {
     reverse_proxy 127.0.0.1:5050
 
     header {

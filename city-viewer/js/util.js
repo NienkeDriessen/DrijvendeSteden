@@ -1,4 +1,4 @@
-const DEFAULT_DEV_API = 'http://127.0.0.1:5050';
+const DEFAULT_DEV_API = '/recognition';
 
 const configuredApi = import.meta.env?.VITE_API_BASE_URL || DEFAULT_DEV_API;
 const shouldUseCurrentOrigin = window.location.protocol === 'https:'
@@ -12,7 +12,7 @@ const normalizedBase = API_BASE.endsWith('/')
     ? API_BASE.slice(0, -1)
     : API_BASE;
 
-const API_URL = `${normalizedBase}/api`;
+const API_URL = `${normalizedBase}/recognition/api`;
 
 
 // 1) fetch only the latest‐20 viewer slots

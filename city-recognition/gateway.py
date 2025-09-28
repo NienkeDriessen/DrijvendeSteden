@@ -13,7 +13,7 @@ import threading
 import time
 
 # Main DB (long-term)
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/recognition/static')
 app.secret_key = os.getenv('SECRET_KEY', 'change-this-to-a-random-value')
 DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'city_data.db'))
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_PATH}'
@@ -103,7 +103,7 @@ def periodic_sync():
         sync_main_db_to_viewer_db()
         time.sleep(5 * 60)  # Perform database sync every 5 min
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/recognition", methods=["GET", "POST"])
 def upload_image():
     if request.method == "POST":
         image = request.files.get("image")
@@ -132,7 +132,7 @@ def upload_image():
     return render_template("upload_image.html")
 
 # 3) new GET‐only endpoint to display the link/QR
-@app.route("/link/<int:city_id>")
+@app.route("/recognition/link/<int:city_id>")
 def show_link(city_id):
     return create_link(city_id)
 
@@ -192,7 +192,7 @@ def requires_auth(f):
     return wrapped
 
 # API endpoints for the viewer app
-@app.route('/api/ids')
+@app.route('/recognition/api/ids')
 @requires_auth
 def api_ids():
     cities = City.query.order_by(City.id).all()
@@ -207,7 +207,7 @@ def api_ids():
         for c in cities
     ])
 
-@app.route('/api/city/<int:city_id>')
+@app.route('/recognition/api/city/<int:city_id>')
 @requires_auth
 def api_city(city_id):
     city = City.query.get_or_404(city_id)
@@ -229,7 +229,7 @@ def api_city(city_id):
     })
 
 # THIS ENDPOINT IS NOW PUBLIC FOR THE VIEWER
-@app.route('/api/viewer/ids')
+@app.route('/recognition/api/viewer/ids')
 def api_viewer_ids():
     with viewer_engine.connect() as conn:
         rows = conn.execute(text('SELECT slot_id, main_id, name, upload_date, grid_data FROM ViewerCity ORDER BY slot_id')).fetchall()
@@ -248,7 +248,7 @@ def api_viewer_ids():
     ])
 
 # THIS ENDPOINT IS NOW PUBLIC FOR THE VIEWER
-@app.route('/api/viewer/city/<int:slot_id>')
+@app.route('/recognition/api/viewer/city/<int:slot_id>')
 def api_viewer_city(slot_id):
     with viewer_engine.connect() as conn:
         row = conn.execute(
@@ -267,7 +267,7 @@ def api_viewer_city(slot_id):
         'grid_data': json.loads(row.grid_data)
     })
 
-@app.route('/api/viewer/debug')
+@app.route('/recognition/api/viewer/debug')
 @requires_auth
 def api_viewer_debug():
     """

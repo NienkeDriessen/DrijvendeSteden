@@ -1,0 +1,45 @@
+URIError: URI malformed
+    at decodeURIComponent (<anonymous>)
+    at viteHtmlFallbackMiddleware (file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:34884:22)
+    at call (file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:19166:7)
+    at next (file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:19110:5)
+    at file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:35334:28
+    at viteAssetMiddleware (file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:48301:5)
+    at call (file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:19166:7)
+    at next (file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:19110:5)
+    at file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:48186:3
+    at call (file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:19166:7)
+URIError: URI malformed
+    at decodeURIComponent (<anonymous>)
+    at viteHtmlFallbackMiddleware (file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:34884:22)
+    at call (file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:19166:7)
+    at next (file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:19110:5)
+    at file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:35334:28
+    at viteAssetMiddleware (file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:48301:5)
+    at call (file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:19166:7)
+    at next (file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:19110:5)
+    at file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:48186:3
+    at call (file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:19166:7)
+URIError: URI malformed
+    at decodeURIComponent (<anonymous>)
+    at viteHtmlFallbackMiddleware (file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:34884:22)
+    at call (file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:19166:7)
+    at next (file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:19110:5)
+    at file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:35334:28
+    at viteAssetMiddleware (file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:48301:5)
+    at call (file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:19166:7)
+    at next (file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:19110:5)
+    at file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:48186:3
+    at call (file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:19166:7)
+URIError: URI malformed
+    at decodeURIComponent (<anonymous>)
+    at viteHtmlFallbackMiddleware (file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:34884:22)
+    at call (file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:19166:7)
+    at next (file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:19110:5)
+    at file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:35334:28
+    at viteAssetMiddleware (file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:48301:5)
+    at call (file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:19166:7)
+    at next (file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:19110:5)
+    at file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:48186:3
+    at call (file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:19166:7)
+[33mServer responded with status code 431. See https://vite.dev/guide/troubleshooting.html#_431-request-header-fields-too-large.[39m

@@ -32,6 +32,7 @@ https://sciencecentreontour.tudelft.nl {
     }
 
     # Serve the viewer SPA and fall back to index.html for history API routing
+    root * C:\Users\Public\DrijvendeSteden\city-viewer\dist
     handle {
         file_server
         try_files {path} /index.html

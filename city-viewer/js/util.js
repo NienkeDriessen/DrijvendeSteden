@@ -1,13 +1,24 @@
-// Use the public, HTTP URL of your Flask backend
-const API_BASE = 'http://sciencecentreontour.tudelft.nl:5050';
-// ... existing code ...
-const API_HOST = 'http://192.168.178.101:5050'; // ← IP of your laptop & port of Flask
+const DEFAULT_DEV_API = 'http://127.0.0.1:5050';
+
+const configuredApi = import.meta.env?.VITE_API_BASE_URL || DEFAULT_DEV_API;
+const shouldUseCurrentOrigin = window.location.protocol === 'https:'
+    || window.location.hostname === 'sciencecentreontour.tudelft.nl';
+
+const API_BASE = shouldUseCurrentOrigin
+    ? window.location.origin
+    : configuredApi;
+
+const normalizedBase = API_BASE.endsWith('/')
+    ? API_BASE.slice(0, -1)
+    : API_BASE;
+
+const API_URL = `${normalizedBase}/api`;
 
 
 // 1) fetch only the latest‐20 viewer slots
 export async function getCityIDs() {
     // No 'headers' needed for a public endpoint
-    const res = await fetch(`${API_BASE}/api/viewer/ids`);
+    const res = await fetch(`${API_URL}/viewer/ids`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.json();  // -> [{slot_id, name, upload_date},…]
 }
@@ -16,7 +27,7 @@ export async function getCityIDs() {
 // 2) load a single slot’s full data
 async function loadCityData(slotId) {
     // No 'headers' needed for a public endpoint
-    const res = await fetch(`${API_BASE}/api/viewer/city/${slotId}`);
+    const res = await fetch(`${API_URL}/viewer/city/${slotId}`);
     console.log(res);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.json();  // -> {slot_id,main_id,name,upload_date,grid_data}

@@ -26,7 +26,7 @@ viewer_engine = create_engine(f'sqlite:///{VIEWER_DB_PATH}')
 
 # Proxy / deployment configuration
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
-app.config['PREFERRED_URL_SCHEME'] = os.getenv('PREFERRED_URL_SCHEME', 'http')
+app.config['PREFERRED_URL_SCHEME'] = os.getenv('PREFERRED_URL_SCHEME', 'https')
 FRONTEND_BASE_URL = os.getenv('VIEWER_BASE_URL', 'http://localhost:4173')
 FRONTEND_ORIGIN = os.getenv('FRONTEND_ORIGIN', '*')
 

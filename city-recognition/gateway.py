@@ -150,11 +150,11 @@ def create_result(image, city_name):
     return id
 
 def create_link(id):
-    # Update link to point to local viewer with a simple hash
+    # Update link to point to the public viewer with a simple hash
     # Use the slot_id for the link, not the main_id
     slot_id = ((id - 1) % 20) + 1
-    base_url = FRONTEND_BASE_URL.rstrip('/')
-    link = f"{base_url}/#{slot_id}"  # e.g., https://viewer.example.com/#1
+    base_url = 'https://sciencecentreontour.tudelft.nl'
+    link = f"{base_url}/#{slot_id}"  # e.g., https://sciencecentreontour.tudelft.nl/#1
 
     qr = qrcode.QRCode(version=3, box_size=20, border=10, error_correction=qrcode.constants.ERROR_CORRECT_H)
     qr.add_data(link)

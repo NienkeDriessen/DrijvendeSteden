@@ -18,7 +18,7 @@
                 {% endfor %}
             {% endif %}
         {% endwith %}
-        <form action="/" method="POST" enctype="multipart/form-data">
+        <form action="{{ url_for('upload_image') }}" method="POST" enctype="multipart/form-data">
             <div class="form-group" style="margin-bottom:0.5cm;">
                 <label for="city_name">Type a name for your city (Must be at least 2 alpha-numeric characters, dashes, or underscores)</label>
                 <input 

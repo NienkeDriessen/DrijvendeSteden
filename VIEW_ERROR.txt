@@ -43,3 +43,4 @@ URIError: URI malformed
     at file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:48186:3
     at call (file:///C:/Users/Public/DrijvendeSteden/city-viewer/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:19166:7)
 [33mServer responded with status code 431. See https://vite.dev/guide/troubleshooting.html#_431-request-header-fields-too-large.[39m
+^C^C

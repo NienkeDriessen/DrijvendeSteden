@@ -34,9 +34,12 @@
             <div class="form-group">
                 <h3>Select image</h3>
                 <div class="custom-file">
-                    <input type="file" class="custom-file-input" name="image" id="image" required>
+                    <input type="file" class="custom-file-input" name="image" id="image" required accept="image/png,image/jpeg,image/webp">
                     <!-- <label class="custom-file-label" for="image">Select image...</label> -->
                 </div>
+                <small class="form-text text-muted">
+                    Allowed types: PNG, JPEG, WebP. Max file size: 20 MB. Max image size: 30 MP (30,000,000 pixels).
+                </small>
             </div>
             <button type="submit" class="btn btn-primary">Upload</button>
         </form>

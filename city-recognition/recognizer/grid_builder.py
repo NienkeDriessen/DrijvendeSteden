@@ -147,7 +147,11 @@ def find_adjacent_hexagon(coordinates, filter_threshold = 0.6):
     distance_sum = 0
     for key in adjacent_hexagon:
         distance_sum += distances[key]
-    average_distance = distance_sum / len(adjacent_hexagon)
+    
+    if adjacent_hexagon:
+        average_distance = distance_sum / len(adjacent_hexagon)
+    else :
+        average_distance = 0
 
     return adjacent_hexagon, average_distance
 

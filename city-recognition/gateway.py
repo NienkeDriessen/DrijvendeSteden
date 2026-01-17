@@ -2,7 +2,7 @@ from flask import Flask, request, render_template, redirect, jsonify, flash, Res
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine, text
 from werkzeug.middleware.proxy_fix import ProxyFix
-from recognizer.recognizer import recognize_city
+from recognizer.city_recognizer import recognize_city
 import qrcode
 import os
 import json

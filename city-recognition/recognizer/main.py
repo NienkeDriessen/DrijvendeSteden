@@ -2,17 +2,14 @@ import cv2
 from .building_finder import find_buildings
 from .building_recognizer import recognize_buildings
 from .grid_builder import build_grid
+from .city_recognizer import recognize_city
+from .util import debug_show
 
 # This is only used for local debugging
 if __name__== "__main__" :
-    img = cv2.imread(f'resources/stad1.png')
-    buildings = find_buildings(img)
-    recognized_buildings = recognize_buildings(buildings)
-    building_grid = build_grid(recognized_buildings)
+    debug_image_path = 'recognizer/resources/test_dag_fotos/foto_3_witte_achtergrond.jpeg'
+    # debug_image_path = 'recognizer/resources/stad1.png'
+    print("Debugging city recognizer with image:", debug_image_path)
+    show_debug = True
 
-    # for index in range(0, 8):
-    #     img = cv2.imread(f'resources/testing2/{index}.jpeg')
-    #     buildings = find_buildings(img)
-    #     recognized_buildings = recognize_buildings(buildings)
-    #     building_grid = build_grid(recognized_buildings)
-    
+    grid = recognize_city(debug_image_path, show_debug)

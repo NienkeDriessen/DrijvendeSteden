@@ -17,6 +17,14 @@ def show_image(img, target_size = 800):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
+def debug_show(title, img, wait=True, target_size = 800):
+    img_copy = img.copy()
+    resized = resize_img(img_copy, target_size)
+    cv2.imshow(title, resized)
+    if wait:
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
 def resize_img(raw_img, target_size):
    h, w = raw_img.shape[:2]
    ratio = min(target_size / w, target_size / h)

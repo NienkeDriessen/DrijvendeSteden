@@ -311,7 +311,7 @@ if __name__ == '__main__':
     threading.Thread(target=periodic_sync, daemon=True).start()
 
     # Run on HTTP, no SSL context
-    app.run(host='0.0.0.0', port=5050, debug=True)
+    app.run(host='0.0.0.0', port=5050, debug=False)
 
     # From another machine just run:
     # curl -u youruser:yourpass http://SERVER_IP:5050/api/ids

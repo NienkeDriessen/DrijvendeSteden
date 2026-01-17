@@ -1,21 +1,21 @@
 # HTTPS Deployment Guide
 
 This document shows how to serve both the Flask recognition API and 3js
-viewer securely on `https://sciencecentreontour.tudelft.nl` with automatic HTTP
-→ HTTPS redirects. we use (https://caddyserver.com),
-which terminates TLS and proxies requests to the existing Windows services.
+viewer securely on `https://sciencecentreontour.tudelft.nl` with automatic HTTP to
+HTTPS redirects. we use (https://caddyserver.com),which terminates TLS
+and proxies requests to the existing Windows services.
 
 ## 1. Prerequisites
 
 | Component | Purpose |
 |-----------|---------|
-| Python virtualenv + Flask service | Keeps `gateway.py` running on `http://127.0.0.1:5050` |
+| Python venv + Flask  | Keeps `gateway.py` running on `http://127.0.0.1:5050` |
 | Node/npm | Builds the viewer into static assets (`npm run build`) |
-| Caddy (Windows build) | Handles TLS, HTTPS redirects, and reverse proxy routing |
+| Caddy (Windows) | Handles TLS, HTTPS redirects, and reverse proxy routing |
 
 Open inbound ports **80**, **443**, and **5050** on the Windows host and any upstream
 firewalls. Port 80 is required for ACME/Let's Encrypt challenges, port 443 serves the
-viewer, and port 5050 exposes the recognition UI behind TLS (HTTPS only).
+viewer for the cities, and port 5050 exposes the recognition UI behind TLS (HTTPS).
 
 ## 2. Prepare the applications
 
@@ -64,7 +64,7 @@ The provided configuration:
    recognition UI to the Flask app. Browsers must use HTTPS on that port; HTTP on
    port 5050 cannot be redirected because HTTP and HTTPS can't share a non-standard port.
 - Adds HSTS and other basic security headers.
-- Redirects all HTTP traffic (port 80) to HTTPS automatically (Caddy default).
+- Redirects all HTTP traffic (port 80) to HTTPS automaticall.
 
 ## 4. Run Caddy as a Windows service
 
@@ -107,15 +107,6 @@ If you prefer to run Caddy in the foreground for debugging:
    5. Upload a new city from the recognition UI and confirm the generated QR code
       now uses the HTTPS base URL.
 
-## 6. Optional hardening
-
-- Update the Flask `FRONTEND_ORIGIN` environment variable to a comma-separated
-  list if additional allowed origins are required.
-- Set up a scheduled task to rebuild the viewer bundle (if the project updates
-  frequently).
-- Configure Caddy access logs path and retention policy as needed.
-- For non-public viewers, keep the API endpoints protected with Basic Auth and
-  restrict access via additional Caddy `basicauth` blocks.
 
 ---
 

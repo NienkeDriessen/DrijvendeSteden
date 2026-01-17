@@ -14,7 +14,7 @@ import time
 
 # Main DB (long-term)
 app = Flask(__name__, static_url_path='/recognition/static')
-app.secret_key = os.getenv('RECOG_SECRET_KEY', 'draft_key')
+app.secret_key = os.getenv('RECOG_SECRET_KEY')
 DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'city_data.db'))
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_PATH}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -170,8 +170,8 @@ def create_link(id):
     return render_template('show_link.html', link=link)
 
 # Basic-Auth credentials via env-vars
-API_USER = os.getenv('RECOG_API_USER', 'draft_user')
-API_PASS = os.getenv('RECOG_API_PASS', 'draft_pass')
+API_USER = os.getenv('RECOG_API_USER')
+API_PASS = os.getenv('RECOG_API_PASS')
 
 def check_auth(username, password):
     return username == API_USER and password == API_PASS

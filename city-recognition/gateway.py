@@ -2,6 +2,7 @@ from flask import Flask, request, render_template, redirect, jsonify, flash, Res
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine, text
 from werkzeug.middleware.proxy_fix import ProxyFix
+from werkzeug.exceptions import RequestEntityTooLarge
 from recognizer.recognizer import recognize_city
 import qrcode
 import os
@@ -11,10 +12,104 @@ from functools import wraps
 import ast
 import threading
 import time
+import io
+import re
+import uuid
+
+from PIL import Image, UnidentifiedImageError
 
 # Main DB (long-term)
 app = Flask(__name__, static_url_path='/recognition/static')
 app.secret_key = os.getenv('RECOG_SECRET_KEY')
+
+# Treat all incoming data as untrusted: enforce request and image limits
+MAX_UPLOAD_MB = 20
+app.config['MAX_CONTENT_LENGTH'] = MAX_UPLOAD_MB * 1024 * 1024
+
+ALLOWED_IMAGE_MIMETYPES = {
+    'image/png',
+    'image/jpeg',
+    'image/jpg',
+    'image/webp',
+}
+MAX_IMAGE_PIXELS = 30_000_000
+
+CITY_NAME_MAX_LEN = 100  # matches DB column
+CITY_NAME_PATTERN = re.compile(r"^[A-Za-z0-9 _\-']+$")
+
+
+@app.errorhandler(RequestEntityTooLarge)
+def handle_file_too_large(_error):
+    flash(f'Upload too large (max {MAX_UPLOAD_MB} MB).', 'error')
+    return render_template('upload_image.html'), 413
+
+
+def sanitize_city_name(raw_name: str) -> str:
+    name = (raw_name or '').strip()
+    name = re.sub(r"\s+", " ", name)
+    return name
+
+
+def validate_city_name(raw_name: str) -> tuple[bool, str, str]:
+    name = sanitize_city_name(raw_name)
+    if not name:
+        return False, name, 'City name is required!'
+    if len(name) > CITY_NAME_MAX_LEN:
+        return False, name, f'City name is too long (max {CITY_NAME_MAX_LEN} characters).'
+    if not CITY_NAME_PATTERN.fullmatch(name):
+        return False, name, "City name contains invalid characters. Allowed: letters, numbers, space, _ - '"
+    return True, name, ''
+
+
+def validate_and_store_image(image) -> tuple[bool, str, str]:
+    """Validate uploaded image and store a sanitized PNG copy.
+
+    Returns: (ok, image_path, error_message)
+    """
+    if not image:
+        return False, '', 'No image uploaded!'
+
+    if not getattr(image, 'filename', ''):
+        return False, '', 'Uploaded file has no filename.'
+
+    mimetype = (getattr(image, 'mimetype', '') or '').lower()
+    if mimetype and mimetype not in ALLOWED_IMAGE_MIMETYPES:
+        return False, '', f'Unsupported file type: {mimetype}. Please upload an image.'
+
+    try:
+        image.stream.seek(0)
+    except Exception:
+        pass
+    data = image.read()
+    if not data:
+        return False, '', 'Uploaded file is empty.'
+
+    # Verify actual content (prevents spoofed content-types)
+    try:
+        Image.MAX_IMAGE_PIXELS = MAX_IMAGE_PIXELS
+        with Image.open(io.BytesIO(data)) as img:
+            img.verify()
+    except (UnidentifiedImageError, Image.DecompressionBombError, OSError, ValueError):
+        return False, '', 'Uploaded file is not a valid image.'
+
+    # Re-open after verify() and write a sanitized PNG to strip metadata
+    try:
+        with Image.open(io.BytesIO(data)) as img:
+            img.load()
+            width, height = img.size
+            if width <= 0 or height <= 0:
+                return False, '', 'Invalid image dimensions.'
+            if (width * height) > MAX_IMAGE_PIXELS:
+                return False, '', f'Image too large ({width}x{height}).'
+
+            sanitized = img.convert('RGB')
+            if not os.path.exists('upload'):
+                os.makedirs('upload')
+            out_path = os.path.join('upload', f'{uuid.uuid4().hex}.png')
+            sanitized.save(out_path, format='PNG', optimize=True)
+            return True, out_path, ''
+    except Exception:
+        return False, '', 'Failed to process uploaded image.'
 DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'city_data.db'))
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_PATH}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -107,24 +202,30 @@ def periodic_sync():
 def upload_image():
     if request.method == "POST":
         image = request.files.get("image")
-        city_name = request.form.get("city_name")
+        raw_city_name = request.form.get("city_name")
 
-        if not image:
-            flash('No image uploaded!', 'error')
-            return render_template("upload_image.html")
+        ok_name, city_name, name_error = validate_city_name(raw_city_name)
+        if not ok_name:
+            flash(name_error, 'error')
+            return render_template('upload_image.html')
 
-        if not city_name:
-            flash('City name is required!', 'error')
-            return render_template("upload_image.html")
+        ok_img, image_path, img_error = validate_and_store_image(image)
+        if not ok_img:
+            flash(img_error, 'error')
+            return render_template('upload_image.html')
 
         # Check for duplicate city name
         existing_city = City.query.filter_by(name=city_name).first()
         if existing_city:
             flash('City name already exists. Please choose a different name.', 'error')
-            return render_template("upload_image.html")
+            try:
+                os.remove(image_path)
+            except Exception:
+                pass
+            return render_template('upload_image.html')
 
         # Save & get new ID
-        id = create_result(image, city_name)
+        id = create_result(image_path, city_name)
 
         # 2) PRG: redirect to a GET route instead of rendering directly
         return redirect(url_for('show_link', city_id=id))
@@ -136,13 +237,14 @@ def upload_image():
 def show_link(city_id):
     return create_link(city_id)
 
-def create_result(image, city_name):
-    if not os.path.exists("upload"):
-        os.makedirs("upload")
+def create_result(image_path, city_name):
+    grid = recognize_city(image_path)
 
-    image.save(os.path.join("upload", "img.png"))  # Save with a fixed name
-
-    grid = recognize_city("upload/img.png")
+    # Best-effort cleanup
+    try:
+        os.remove(image_path)
+    except Exception:
+        pass
 
     # Save the grid data to the SQLite database
     id = save_to_database(grid, city_name)
@@ -225,7 +327,7 @@ def api_city(city_id):
         'id': city.id,
         'name': city.name,
         'upload_date': city.upload_date.isoformat(),
-        'grid_data': json.loads(grid)
+        'grid_data': grid
     })
 
 # THIS ENDPOINT IS NOW PUBLIC FOR THE VIEWER
@@ -250,6 +352,8 @@ def api_viewer_ids():
 # THIS ENDPOINT IS NOW PUBLIC FOR THE VIEWER
 @app.route('/recognition/api/viewer/city/<int:slot_id>')
 def api_viewer_city(slot_id):
+    if slot_id < 1 or slot_id > 20:
+        return jsonify({'error': 'slot_id must be between 1 and 20'}), 400
     with viewer_engine.connect() as conn:
         row = conn.execute(
             text('SELECT slot_id, main_id, name, grid_data, upload_date FROM ViewerCity WHERE slot_id = :s'),

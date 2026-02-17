@@ -1,74 +1,59 @@
-const DEFAULT_DEV_API = '/recognition';
+const DEFAULT_DEV_API_BASE = 'http://localhost:5050/DrijvendeSteden/recognition';
+const DEFAULT_PROD_API_BASE = '/DrijvendeSteden/recognition';
 
-const configuredApi = import.meta.env?.VITE_API_BASE_URL || DEFAULT_DEV_API;
-const shouldUseCurrentOrigin = window.location.protocol === 'https:'
-    || window.location.hostname === 'sciencecentreontour.tudelft.nl';
+const configuredApiBase = import.meta.env?.VITE_API_BASE_URL
+  || (import.meta.env?.PROD ? DEFAULT_PROD_API_BASE : DEFAULT_DEV_API_BASE);
 
-const API_BASE = shouldUseCurrentOrigin
-    ? window.location.origin
-    : configuredApi;
+const normalizedBase = configuredApiBase.endsWith('/')
+  ? configuredApiBase.slice(0, -1)
+  : configuredApiBase;
 
-const normalizedBase = API_BASE.endsWith('/')
-    ? API_BASE.slice(0, -1)
-    : API_BASE;
+const apiBase = normalizedBase.startsWith('http://') || normalizedBase.startsWith('https://')
+  ? normalizedBase
+  : `${window.location.origin}${normalizedBase}`;
 
-const API_URL = `${normalizedBase}/recognition/api`;
+const API_URL = `${apiBase}/api`;
 
-
-// 1) fetch only the latest‐20 viewer slots
 export async function getCityIDs() {
-    // No 'headers' needed for a public endpoint
-    const res = await fetch(`${API_URL}/viewer/ids`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();  // -> [{slot_id, name, upload_date},…]
+  const res = await fetch(`${API_URL}/viewer/ids`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
 }
 
-
-// 2) load a single slot’s full data
 async function loadCityData(slotId) {
-    // No 'headers' needed for a public endpoint
-    const res = await fetch(`${API_URL}/viewer/city/${slotId}`);
-    console.log(res);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();  // -> {slot_id,main_id,name,upload_date,grid_data}
+  const res = await fetch(`${API_URL}/viewer/city/${slotId}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
 }
 
 export async function load_city_definition() {
-    // normalize the hash into a pure numeric slot ID
-    const raw = window.location.hash.slice(1); // e.g., "1", "15", etc.
-    let slotId = raw || '1'; // Use the hash value, or default to '1'
+  const raw = window.location.hash.slice(1);
+  const slotId = raw || '1';
 
-    const cityData = await loadCityData(slotId);
-    console.log('💾 raw cityData.grid_data:', cityData.grid_data);
+  const cityData = await loadCityData(slotId);
+  if (!cityData || !cityData.grid_data) {
+    console.warn(`No city data found for slot: ${slotId}`);
+    return { city_definition: {}, numCols: -1, numRows: -1 };
+  }
 
-    if (!cityData || !cityData.grid_data) {
-        console.warn(`No city data found for slot: ${slotId}`);
-        return { city_definition: {}, numCols: -1, numRows: -1 };
-    }
+  const city_definition = {};
+  let numCols = -1;
+  let numRows = -1;
 
-    let city_definition = {};
-    let numCols = -1;
-    let numRows = -1;
+  const data = cityData.grid_data;
+  for (const key in data) {
+    const coords = parseCoords(key);
+    if (coords[0] > numRows) numRows = coords[0];
+    if (coords[1] > numCols) numCols = coords[1];
+    city_definition[coords] = data[key];
+  }
 
-    const data = cityData.grid_data;
-
-    for (let key in data) {
-        const coords = parseCoords(key);
-        if (coords[0] > numRows)
-            numRows = coords[0]
-        if (coords[1] > numCols)
-            numCols = coords[1]
-
-        city_definition[coords] = data[key];
-    }
-    return { city_definition, numCols, numRows };
+  return { city_definition, numCols, numRows };
 }
 
 function parseCoords(key) {
-    // strip parentheses if present
-    const raw = key.startsWith('(') && key.endsWith(')') 
-      ? key.slice(1, -1) 
-      : key;
-    const parts = raw.split(',');
-    return parts.map(p => parseInt(p.trim(), 10));
+  const raw = key.startsWith('(') && key.endsWith(')')
+    ? key.slice(1, -1)
+    : key;
+  return raw.split(',').map((part) => parseInt(part.trim(), 10));
 }

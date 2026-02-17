@@ -18,8 +18,14 @@ import uuid
 
 from PIL import Image, UnidentifiedImageError
 
+# Public URL namespace for the recognition application.
+RECOGNITION_BASE_PATH = os.getenv('RECOG_BASE_PATH', '/DrijvendeSteden/recognition').strip()
+if not RECOGNITION_BASE_PATH.startswith('/'):
+    RECOGNITION_BASE_PATH = f'/{RECOGNITION_BASE_PATH}'
+RECOGNITION_BASE_PATH = RECOGNITION_BASE_PATH.rstrip('/')
+
 # Main DB (long-term)
-app = Flask(__name__, static_url_path='/recognition/static')
+app = Flask(__name__, static_url_path=f'{RECOGNITION_BASE_PATH}/static')
 app.secret_key = os.getenv('RECOG_SECRET_KEY')
 
 # Treat all incoming data as untrusted: enforce request and image limits
@@ -122,7 +128,10 @@ viewer_engine = create_engine(f'sqlite:///{VIEWER_DB_PATH}')
 # Proxy / deployment configuration
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 app.config['PREFERRED_URL_SCHEME'] = os.getenv('PREFERRED_URL_SCHEME', 'https')
-FRONTEND_BASE_URL = os.getenv('VIEWER_BASE_URL', 'http://localhost:4173')
+FRONTEND_BASE_URL = os.getenv(
+    'VIEWER_BASE_URL',
+    'https://sciencecentreontour.tudelft.nl/DrijvendeSteden/viewer',
+)
 FRONTEND_ORIGIN = os.getenv('FRONTEND_ORIGIN', 'https://sciencecentreontour.tudelft.nl')
 
 # Create viewer table if not exists
@@ -198,7 +207,7 @@ def periodic_sync():
         sync_main_db_to_viewer_db()
         time.sleep(5 * 60)  # Perform database sync every 5 min
 
-@app.route("/recognition", methods=["GET", "POST"])
+@app.route(f"{RECOGNITION_BASE_PATH}", methods=["GET", "POST"])
 def upload_image():
     if request.method == "POST":
         image = request.files.get("image")
@@ -233,7 +242,7 @@ def upload_image():
     return render_template("upload_image.html")
 
 # 3) new GET‐only endpoint to display the link/QR
-@app.route("/recognition/link/<int:city_id>")
+@app.route(f"{RECOGNITION_BASE_PATH}/link/<int:city_id>")
 def show_link(city_id):
     return create_link(city_id)
 
@@ -252,11 +261,9 @@ def create_result(image_path, city_name):
     return id
 
 def create_link(id):
-    # Update link to point to the public viewer with a simple hash
-    # Use the slot_id for the link, not the main_id
+    # Use the slot_id for public viewer links and QR codes.
     slot_id = ((id - 1) % 20) + 1
-    base_url = 'https://sciencecentreontour.tudelft.nl'
-    link = f"{base_url}/#{slot_id}"  # e.g., https://sciencecentreontour.tudelft.nl/#1
+    link = f"{FRONTEND_BASE_URL.rstrip('/')}/#{slot_id}"
 
     qr = qrcode.QRCode(version=3, box_size=20, border=10, error_correction=qrcode.constants.ERROR_CORRECT_H)
     qr.add_data(link)
@@ -294,7 +301,7 @@ def requires_auth(f):
     return wrapped
 
 # API endpoints for the viewer app
-@app.route('/recognition/api/ids')
+@app.route(f'{RECOGNITION_BASE_PATH}/api/ids')
 @requires_auth
 def api_ids():
     cities = City.query.order_by(City.id).all()
@@ -309,7 +316,7 @@ def api_ids():
         for c in cities
     ])
 
-@app.route('/recognition/api/city/<int:city_id>')
+@app.route(f'{RECOGNITION_BASE_PATH}/api/city/<int:city_id>')
 @requires_auth
 def api_city(city_id):
     city = City.query.get_or_404(city_id)
@@ -331,7 +338,7 @@ def api_city(city_id):
     })
 
 # THIS ENDPOINT IS NOW PUBLIC FOR THE VIEWER
-@app.route('/recognition/api/viewer/ids')
+@app.route(f'{RECOGNITION_BASE_PATH}/api/viewer/ids')
 def api_viewer_ids():
     with viewer_engine.connect() as conn:
         rows = conn.execute(text('SELECT slot_id, main_id, name, upload_date, grid_data FROM ViewerCity ORDER BY slot_id')).fetchall()
@@ -350,7 +357,7 @@ def api_viewer_ids():
     ])
 
 # THIS ENDPOINT IS NOW PUBLIC FOR THE VIEWER
-@app.route('/recognition/api/viewer/city/<int:slot_id>')
+@app.route(f'{RECOGNITION_BASE_PATH}/api/viewer/city/<int:slot_id>')
 def api_viewer_city(slot_id):
     if slot_id < 1 or slot_id > 20:
         return jsonify({'error': 'slot_id must be between 1 and 20'}), 400
@@ -371,7 +378,7 @@ def api_viewer_city(slot_id):
         'grid_data': json.loads(row.grid_data)
     })
 
-@app.route('/recognition/api/viewer/debug')
+@app.route(f'{RECOGNITION_BASE_PATH}/api/viewer/debug')
 @requires_auth
 def api_viewer_debug():
     """
@@ -417,8 +424,5 @@ if __name__ == '__main__':
     # Run on HTTP, no SSL context
     app.run(host='0.0.0.0', port=5050, debug=False)
 
-    # From another machine just run:
-    # curl -u youruser:yourpass http://SERVER_IP:5050/api/ids
-
-    # From another machine just run:
-    # curl -u youruser:yourpass http://SERVER_IP:5000/api/ids
+    # Example through the public domain:
+    # curl -u youruser:yourpass https://sciencecentreontour.tudelft.nl/DrijvendeSteden/recognition/api/ids

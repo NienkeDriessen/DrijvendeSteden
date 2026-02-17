@@ -421,8 +421,8 @@ if __name__ == '__main__':
     # Start the periodic sync in a background thread
     threading.Thread(target=periodic_sync, daemon=True).start()
 
-    # Run on HTTP, no SSL context
-    app.run(host='0.0.0.0', port=5050, debug=False)
+    # Run on HTTP, no SSL context (loopback only)
+    app.run(host='127.0.0.1', port=5050, debug=False)
 
     # Example through the public domain:
     # curl -u youruser:yourpass https://sciencecentreontour.tudelft.nl/DrijvendeSteden/recognition/api/ids
